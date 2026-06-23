@@ -79,10 +79,12 @@ th { background: #f8f9fa; color: #666; font-size: 0.75rem; text-transform: upper
     <div id="statoAtleti" style="background:#f1f3f4; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.85rem; color:#666; text-align:center">
         Nessuna lista caricata
     </div>
-    <div style="display:flex; gap:8px;">
-        <button class="btn" style="background:#1565c0" id="btnCaricaAtleti">📂 Carica Lista</button>
-        <button class="btn btn-backup" id="btnExport">Backup</button>
-        <button class="btn" style="background:#546e7a" id="btnFakeImport">Importa</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" style="background:#1565c0; flex:1; min-width:90px" id="btnCaricaAtleti">📂 Carica</button>
+        <button class="btn" style="background:#2e7d32; flex:1; min-width:90px" id="btnScaricaAtleti">📥 Scarica</button>
+        <button class="btn" style="background:#d32f2f; flex:1; min-width:90px" id="btnRimuoviAtleti">🗑 Rimuovi</button>
+        <button class="btn btn-backup" id="btnExport" style="flex:1; min-width:90px">Backup</button>
+        <button class="btn" style="background:#546e7a; flex:1; min-width:90px" id="btnFakeImport">Importa</button>
     </div>
     <input type="file" id="importFile" style="visibility:hidden; width:0; height:0;" accept=".json">
     <input type="file" id="caricaAtletiFile" style="visibility:hidden; width:0; height:0;" accept=".json">
@@ -327,6 +329,32 @@ document.getElementById('caricaAtletiFile').onchange = function(e) {
     if (e.target.files.length > 0) {
         caricaDaFileJSON(e.target.files[0]);
     }
+};
+
+function scaricaJSON(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('btnScaricaAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da scaricare.'); return; }
+    scaricaJSON(atleti, 'atleti.json');
+};
+
+document.getElementById('btnRimuoviAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da rimuovere.'); return; }
+    if (!confirm('Rimuovere la lista atleti? Dovrai ricaricare il file JSON.')) return;
+    localStorage.removeItem(ATLETA_KEY);
+    atleti = [];
+    presenze.clear();
+    aggiornaStatoAtleti();
 };
 
 caricaAtletiSalvati();
