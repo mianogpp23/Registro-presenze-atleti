@@ -413,4 +413,596 @@ function validaAtleti(data) {
     }
     return data.map((x, i) => {
         const a = Number(x && x.a);
-        if (!x || type
+        if (!x || typeof x.n !== 'string' || !x.n.trim() || !Number.isInteger(a)) {
+            throw new Error('Atleta #' + (i + 1) + ' non valido. Ogni atleta deve avere "n" (nome) e "a" (anno).');
+        }
+        const atleta = { n: x.n.trim(), a: a };
+        const c = (typeof x.c === 'string') ? x.c.trim().slice(0, 30) : '';
+        if (c) atleta.c = c;
+        return atleta;
+    });
+}
+
+function caricaAtletiSalvati() {
+    try {
+        const data = localStorage.getItem(ATLETA_KEY);
+        if (data) {
+            atleti = validaAtleti(JSON.parse(data)).sort((a, b) => a.n.localeCompare(b.n));
+        }
+    } catch(e) { atleti = []; }
+    aggiornaStatoAtleti();
+}
+
+function aggiornaStatoAtleti() {
+    const el = document.getElementById('statoAtleti');
+    const btnCat = document.getElementById('btnModificaCat');
+    costruisciFiltro();
+    if (atleti.length > 0) {
+        el.innerHTML = '✅ <strong>' + atleti.length + '</strong> atleti caricati';
+        document.getElementById('filtroCat').style.display = '';
+        btnCat.style.display = '';
+    } else {
+        el.textContent = '⚠️ Nessuna lista caricata. Usa "📂 Carica" per caricare un file JSON.';
+        document.getElementById('filtroCat').style.display = 'none';
+        btnCat.style.display = 'none';
+        modCat = false;
+        btnCat.textContent = '✏️ Modifica categorie';
+    }
+    render();
+}
+
+function caricaDaFileJSON(file) {
+    const r = new FileReader();
+    r.onload = function(ev) {
+        try {
+            const lista = validaAtleti(JSON.parse(ev.target.result));
+            atleti = lista.sort((a, b) => a.n.localeCompare(b.n));
+            localStorage.setItem(ATLETA_KEY, JSON.stringify(atleti));
+            aggiornaStatoAtleti();
+            alert('✅ Caricati ' + atleti.length + ' atleti!');
+        } catch(e) {
+            alert('Errore: ' + e.message);
+        }
+    };
+    r.readAsText(file);
+}
+
+/* ---------- PRESENZE ---------- */
+
+function caricaGiorno(data) {
+    const reg = leggiRegistro();
+    presenze = new Set(reg[data] || []);
+    modificato = false;
+    dataCorrente = data;
+    aggiornaGiorniSalvati();
+    aggiornaAnteprima();
+}
+
+// Menù a tendina con i giorni che hanno presenze salvate (dal più recente)
+function aggiornaGiorniSalvati() {
+    const sel = document.getElementById('giorniSalvati');
+    const reg = leggiRegistro();
+    const giorni = Object.keys(reg).filter(d => Array.isArray(reg[d])).sort().reverse();
+    sel.innerHTML = '';
+    const primo = document.createElement('option');
+    primo.value = '';
+    primo.textContent = giorni.length ? '— scegli un giorno —' : 'Nessun giorno salvato';
+    sel.appendChild(primo);
+    giorni.forEach(d => {
+        const p = d.split('-').map(Number);
+        const testo = new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('it-IT',
+            { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+        const o = document.createElement('option');
+        o.value = d;
+        o.textContent = testo + ' · ' + reg[d].length + ' presenti';
+        sel.appendChild(o);
+    });
+    sel.value = reg[dataCorrente] ? dataCorrente : '';
+}
+
+function render() {
+    const tbody = document.getElementById('atletiBody');
+    tbody.innerHTML = '';
+    const f = document.getElementById('filtroCat').value;
+    atleti.forEach(atleta => {
+        let ok = (f==='tutti') || norm(categoriaDi(atleta)) === f;
+        if(ok) {
+            const tr = document.createElement('tr');
+            tr.className = 'atleta-row' + (presenze.has(atleta.n) ? ' presente' : '');
+
+            const tdNome = document.createElement('td');
+            tdNome.appendChild(document.createTextNode(atleta.n));
+            if (modCat) {
+                const sel = document.createElement('select');
+                const auto = CATEGORIE.find(c => c.anni.includes(atleta.a));
+                const aggiungi = (valore, testo) => {
+                    const o = document.createElement('option');
+                    o.value = valore;
+                    o.textContent = testo;
+                    sel.appendChild(o);
+                };
+                aggiungi('', 'Automatica (' + (auto ? auto.nome : 'nessuna') + ')');
+                CATEGORIE.forEach(c => aggiungi(c.nome, c.nome));
+                // se l'atleta ha una categoria diversa dalle standard, resta selezionabile
+                if (atleta.c && !CATEGORIE.some(c => norm(c.nome) === norm(atleta.c))) {
+                    aggiungi(atleta.c, atleta.c);
+                }
+                const attuale = CATEGORIE.find(c => norm(c.nome) === norm(atleta.c));
+                sel.value = atleta.c ? (attuale ? attuale.nome : atleta.c) : '';
+                sel.onchange = () => {
+                    if (sel.value) atleta.c = sel.value; else delete atleta.c;
+                    salvaAtleti();
+                };
+                tdNome.appendChild(sel);
+            } else if (atleta.c) {
+                const sub = document.createElement('div');
+                sub.style.cssText = 'font-size:0.7rem; color:#888; font-weight:normal;';
+                sub.textContent = atleta.c;
+                tdNome.appendChild(sub);
+            }
+            const tdAnno = document.createElement('td');
+            tdAnno.textContent = atleta.a;
+            const tdOk = document.createElement('td');
+            tdOk.className = 'no-print';
+            tdOk.style.textAlign = 'center';
+            const mark = document.createElement('span');
+            mark.className = 'check-mark';
+            mark.textContent = presenze.has(atleta.n) ? '●' : '○';
+            tdOk.appendChild(mark);
+
+            tr.appendChild(tdNome);
+            tr.appendChild(tdAnno);
+            tr.appendChild(tdOk);
+
+            tr.onclick = (e) => {
+                if (modCat) return;
+                e.preventDefault();
+                if(presenze.has(atleta.n)) presenze.delete(atleta.n);
+                else presenze.add(atleta.n);
+                modificato = true;
+                aggiornaAnteprima();
+            };
+            tbody.appendChild(tr);
+        }
+    });
+}
+
+function aggiornaAnteprima() {
+    render();
+    const arr = Array.from(presenze).sort((a, b) => a.localeCompare(b));
+    const box = document.getElementById('anteprimaBox');
+    if(arr.length > 0) {
+        const coach = nomeCoach();
+        box.innerText = `*PRESENTI ${document.getElementById('dataAllenamento').value}*\n` + (coach ? `Coach: ${coach}\n` : '') + `Totale: ${arr.length}\n----------\n- ` + arr.join('\n- ');
+    } else {
+        box.innerText = "Tocca un nome per iniziare...";
+    }
+}
+
+// Cambia giorno chiedendo conferma se ci sono presenze non salvate
+function vaiAData(data) {
+    const el = document.getElementById('dataAllenamento');
+    if (!data) { el.value = dataCorrente; return false; }
+    if (data !== dataCorrente && modificato &&
+        !confirm('Hai presenze non salvate. Cambiando data andranno perse. Continuare?')) {
+        el.value = dataCorrente;
+        return false;
+    }
+    el.value = data;
+    caricaGiorno(data);
+    return true;
+}
+
+/* ---------- INIZIALIZZAZIONE DATE ---------- */
+
+const oggi = oggiLocale();
+document.getElementById('dataAllenamento').value = oggi;
+document.getElementById('meseStats').value = oggi.slice(0, 7);
+
+document.getElementById('dataAllenamento').onchange = (e) => vaiAData(e.target.value);
+
+document.getElementById('giorniSalvati').onchange = (e) => {
+    if (e.target.value) vaiAData(e.target.value);
+    aggiornaGiorniSalvati();
+};
+
+/* ---------- STORICO E STATISTICHE ---------- */
+
+document.getElementById('btnCalcolaStats').onclick = () => {
+    const mese = document.getElementById('meseStats').value;
+    const reg = leggiRegistro();
+    const conteggio = new Map();
+    let sessioni = 0;
+    for (const [d, lista] of Object.entries(reg)) {
+        if (mese && d.startsWith(mese) && Array.isArray(lista)) {
+            sessioni++;
+            lista.forEach(n => conteggio.set(n, (conteggio.get(n) || 0) + 1));
+        }
+    }
+    const res = Array.from(conteggio.entries()).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+    document.getElementById('statsResult').style.display = 'block';
+    document.getElementById('totAllenamentiMese').innerText = `SESSIONI TOTALI: ${sessioni}`;
+
+    const box = document.getElementById('listaRanking');
+    box.innerHTML = '';
+    res.forEach(i => {
+        const row = document.createElement('div');
+        row.className = 'ranking-item';
+        const nome = document.createElement('span');
+        nome.textContent = i[0];
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = i[1] + ' / ' + sessioni;
+        row.appendChild(nome);
+        row.appendChild(badge);
+        box.appendChild(row);
+    });
+};
+
+function preparaStampa() {
+    document.body.classList.remove('stampa-foglio');
+    document.getElementById('dataStampaHeader').innerText = "REGISTRO: " + document.getElementById('dataAllenamento').value;
+    window.print();
+}
+
+/* ---------- SALVA / RESET ---------- */
+
+document.getElementById('btnSalva').onclick = () => {
+    const data = document.getElementById('dataAllenamento').value;
+    if (!data) { alert('Scegli una data.'); return; }
+    const reg = leggiRegistro();
+
+    if (presenze.size === 0) {
+        if (reg[data]) {
+            if (confirm('Nessun presente: vuoi eliminare il salvataggio di questa data?')) {
+                delete reg[data];
+                if (scriviRegistro(reg)) { modificato = false; aggiornaGiorniSalvati(); alert('Salvataggio eliminato.'); }
+            }
+        } else {
+            alert('Nessun presente da salvare.');
+        }
+        return;
+    }
+
+    reg[data] = Array.from(presenze);
+    if (scriviRegistro(reg)) {
+        dataCorrente = data;
+        modificato = false;
+        aggiornaGiorniSalvati();
+        alert("Salvato correttamente!");
+    }
+};
+
+document.getElementById('btnReset').onclick = () => {
+    if(confirm("Svuotare la lista attuale?")) { presenze.clear(); modificato = true; aggiornaAnteprima(); }
+};
+
+/* ---------- SYNC TRA COACH ---------- */
+
+// Controlla che il file ricevuto sia uno storico presenze valido
+// (stesso formato del vecchio backup: { "AAAA-MM-GG": ["Nome", ...] })
+function validaRegistro(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+        throw new Error('formato non riconosciuto');
+    }
+    const out = {};
+    for (const [d, lista] of Object.entries(obj)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !Array.isArray(lista) || !lista.every(n => typeof n === 'string')) {
+            throw new Error('dati non validi alla data ' + d);
+        }
+        out[d] = Array.from(new Set(lista));
+    }
+    return out;
+}
+
+// Il file può essere nel formato nuovo { coach, presenze } oppure nel vecchio { data: [nomi] }
+function leggiFileSync(obj) {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj) && obj.presenze && typeof obj.presenze === 'object') {
+        return {
+            coach: typeof obj.coach === 'string' ? obj.coach.trim().slice(0, 40) : '',
+            registro: validaRegistro(obj.presenze)
+        };
+    }
+    return { coach: '', registro: validaRegistro(obj) };
+}
+
+// CONDIVIDI COACH: manda le presenze salvate (menu condividi, altrimenti download)
+document.getElementById('btnExport').onclick = async () => {
+    const coach = nomeCoach();
+    if (!coach) { alert('Scrivi prima il tuo nome nel campo Coach.'); document.getElementById('nomeCoach').focus(); return; }
+    const reg = leggiRegistro();
+    if (Object.keys(reg).length === 0) { alert('Nessuna presenza salvata da condividere.'); return; }
+    const testo = JSON.stringify({ coach: coach, presenze: reg });
+    const nome = 'presenze_' + (coach.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'coach') + '_' + oggiLocale() + '.json';
+    try {
+        const file = new File([testo], nome, {type: 'application/json'});
+        if (navigator.canShare && navigator.canShare({files: [file]})) {
+            await navigator.share({files: [file], title: 'Presenze coach'});
+            return;
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return; // l'utente ha chiuso il menu
+    }
+    scaricaTesto(testo, nome);
+};
+
+// UNISCI DA COACH: fonde le presenze ricevute con quelle del telefono
+document.getElementById('btnFakeImport').onclick = () => document.getElementById('importFile').click();
+
+document.getElementById('importFile').onchange = (e) => {
+    const f = e.target.files[0];
+    e.target.value = ''; // permette di riselezionare lo stesso file
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = (ev) => {
+        let ricevuto, daCoach = '';
+        try {
+            const f = leggiFileSync(JSON.parse(ev.target.result));
+            ricevuto = f.registro;
+            daCoach = f.coach;
+        } catch (err) {
+            alert('File non valido: ' + err.message);
+            return;
+        }
+        const reg = leggiRegistro();
+        const unito = Object.assign({}, reg);
+        let nuove = 0, aggiornate = 0;
+        for (const [d, lista] of Object.entries(ricevuto)) {
+            if (!reg[d]) {
+                unito[d] = lista;
+                nuove++;
+            } else {
+                const set = new Set([].concat(reg[d], lista));
+                if (set.size > new Set(reg[d]).size) {
+                    unito[d] = Array.from(set).sort((a, b) => a.localeCompare(b));
+                    aggiornate++;
+                }
+            }
+        }
+        if (nuove === 0 && aggiornate === 0) {
+            alert('Niente di nuovo: hai già tutte queste presenze.');
+            return;
+        }
+        if (!confirm('Unire le presenze' + (daCoach ? ' di ' + daCoach : '') + '?\n\nDate nuove: ' + nuove + '\nDate aggiornate: ' + aggiornate + '\n\nPrima ne viene salvato un backup.')) return;
+        if (!creaBackup('unione')) return;
+        if (!scriviRegistro(unito)) return;
+        aggiornaGiorniSalvati();
+
+        // aggiorna anche lo schermo se la data aperta è stata toccata
+        if (unito[dataCorrente]) unito[dataCorrente].forEach(n => presenze.add(n));
+        aggiornaAnteprima();
+        alert('✅ Presenze unite!');
+    };
+    r.readAsText(f);
+};
+
+/* ---------- LISTA ATLETI: PULSANTI ---------- */
+
+document.getElementById('filtroCat').onchange = render;
+
+document.getElementById('btnModificaCat').onclick = function() {
+    if (atleti.length === 0) { alert('Carica prima la lista atleti.'); return; }
+    modCat = !modCat;
+    this.textContent = modCat ? '✅ Fine modifica categorie' : '✏️ Modifica categorie';
+    if (!modCat) costruisciFiltro();
+    render();
+};
+
+document.getElementById('btnCaricaAtleti').onclick = function() {
+    document.getElementById('caricaAtletiFile').click();
+};
+
+document.getElementById('caricaAtletiFile').onchange = function(e) {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (f) caricaDaFileJSON(f);
+};
+
+document.getElementById('btnScaricaAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da scaricare.'); return; }
+    scaricaJSON(atleti, 'atleti.json');
+};
+
+document.getElementById('btnRimuoviAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da rimuovere.'); return; }
+    if (!confirm('Rimuovere la lista atleti? Dovrai ricaricare il file JSON.')) return;
+    localStorage.removeItem(ATLETA_KEY);
+    atleti = [];
+    presenze.clear();
+    modificato = false;
+    aggiornaStatoAtleti();
+};
+
+/* ---------- RIPRISTINO BACKUP ---------- */
+
+document.getElementById('btnRipristina').onclick = () => {
+    const i = document.getElementById('listaBackup').value;
+    const lista = leggiBackup();
+    if (i === '' || !lista[i]) { alert('Scegli un backup dal menù.'); return; }
+    let registro;
+    try { registro = validaRegistro(lista[i].registro); }
+    catch (e) { alert('Backup non valido.'); return; }
+    const quando = formattaOra(lista[i].ts);
+    if (!confirm('Ripristinare lo storico com\'era il ' + quando + '?\n\nLe presenze attuali vengono sostituite (prima ne viene salvata una copia).' + (modificato ? '\nLe presenze non salvate sullo schermo andranno perse.' : ''))) return;
+    if (!creaBackup('ripristino')) return;
+    if (!scriviRegistro(registro)) return;
+    caricaGiorno(dataCorrente);
+    alert('✅ Storico ripristinato.');
+};
+
+document.getElementById('btnRipristinaFile').onclick = () => document.getElementById('ripristinaFile').click();
+
+// Ripristina lo storico da un file scelto a mano (qualsiasi file di presenze, non solo i backup automatici)
+document.getElementById('ripristinaFile').onchange = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = (ev) => {
+        let registro, daCoach = '';
+        try {
+            const x = leggiFileSync(JSON.parse(ev.target.result));
+            registro = x.registro;
+            daCoach = x.coach;
+        } catch (err) {
+            alert('File non valido: ' + err.message);
+            return;
+        }
+        const n = Object.keys(registro).length;
+        if (n === 0) { alert('Il file non contiene presenze.'); return; }
+        if (!confirm('Ripristinare da file' + (daCoach ? ' di ' + daCoach : '') + '?\n\nIl file contiene ' + n + ' giorni. Tutto lo storico attuale viene SOSTITUITO.\n\nPrima ne viene salvata una copia di sicurezza.' + (modificato ? '\nLe presenze non salvate sullo schermo andranno perse.' : ''))) return;
+        if (!creaBackup('ripristino')) return;
+        if (!scriviRegistro(registro)) return;
+        caricaGiorno(dataCorrente);
+        alert('✅ Storico ripristinato dal file.');
+    };
+    r.readAsText(f);
+};
+
+/* ---------- COACH ---------- */
+
+document.getElementById('nomeCoach').oninput = () => {
+    try { localStorage.setItem(COACH_KEY, nomeCoach()); } catch (e) {}
+    aggiornaAnteprima();
+};
+
+/* ---------- FOGLIO PRESENZE STAMPABILE ---------- */
+
+// Gruppi del foglio: le categorie standard, poi quelle scritte a mano, poi chi non ha categoria
+function gruppiFoglio() {
+    const gruppi = [];
+    const usati = new Set();
+    CATEGORIE.forEach(c => {
+        usati.add(norm(c.nome));
+        gruppi.push({ chiave: norm(c.nome), titolo: c.nome.toUpperCase() + ' (' + c.anni[0] + '-' + String(c.anni[1]).slice(2) + ')' });
+    });
+    atleti.forEach(a => {
+        const cat = categoriaDi(a);
+        if (cat && !usati.has(norm(cat))) {
+            usati.add(norm(cat));
+            gruppi.push({ chiave: norm(cat), titolo: cat.toUpperCase() });
+        }
+    });
+    gruppi.push({ chiave: '', titolo: 'SENZA CATEGORIA' });
+    return gruppi
+        .map(g => ({ titolo: g.titolo, atleti: atleti.filter(a => norm(categoriaDi(a)) === g.chiave) }))
+        .filter(g => g.atleti.length > 0);
+}
+
+function tabellaFoglio(lista, anno, m, nGiorni) {
+    const tab = document.createElement('table');
+    const cg = document.createElement('colgroup');
+    const larghezze = [4, 26];
+    for (let g = 1; g <= nGiorni; g++) larghezze.push(65 / nGiorni);
+    larghezze.push(5);
+    larghezze.forEach(l => {
+        const c = document.createElement('col');
+        c.style.width = l + '%';
+        cg.appendChild(c);
+    });
+    tab.appendChild(cg);
+
+    const lettere = ['D', 'L', 'M', 'M', 'G', 'V', 'S'];
+    const eDomenica = g => new Date(anno, m - 1, g).getDay() === 0;
+
+    // intestazione: N. | ATLETA | giorni | TOT
+    const thead = document.createElement('thead');
+    const trH = document.createElement('tr');
+    const intest = (testo, classe) => {
+        const th = document.createElement('th');
+        th.textContent = testo;
+        if (classe) th.className = classe;
+        return th;
+    };
+    trH.appendChild(intest('N.'));
+    trH.appendChild(intest('ATLETA'));
+    for (let g = 1; g <= nGiorni; g++) {
+        const th = document.createElement('th');
+        if (eDomenica(g)) th.className = 'dom';
+        th.appendChild(document.createTextNode(String(g)));
+        th.appendChild(document.createElement('br'));
+        th.appendChild(document.createTextNode(lettere[new Date(anno, m - 1, g).getDay()]));
+        trH.appendChild(th);
+    }
+    trH.appendChild(intest('TOT', 'tot'));
+    thead.appendChild(trH);
+    tab.appendChild(thead);
+
+    // righe: numero, nome, una cella per giorno (dove mettere la X), totale
+    const tbody = document.createElement('tbody');
+    lista.forEach((a, i) => {
+        const tr = document.createElement('tr');
+        const tdNum = document.createElement('td');
+        tdNum.className = 'num';
+        tdNum.textContent = String(i + 1);
+        tr.appendChild(tdNum);
+        const tdN = document.createElement('td');
+        tdN.className = 'nome';
+        tdN.textContent = a.n;
+        tr.appendChild(tdN);
+        for (let g = 1; g <= nGiorni; g++) {
+            const td = document.createElement('td');
+            if (eDomenica(g)) td.className = 'dom';
+            tr.appendChild(td);
+        }
+        const tdTot = document.createElement('td');
+        tdTot.className = 'tot';
+        tr.appendChild(tdTot);
+        tbody.appendChild(tr);
+    });
+    tab.appendChild(tbody);
+    return tab;
+}
+
+// Foglio da compilare a mano: tutto il mese, tutti gli atleti, una pagina per gruppo
+function creaFoglio() {
+    const mese = document.getElementById('meseFoglio').value;
+    if (!mese) { alert('Scegli un mese.'); return; }
+    if (atleti.length === 0) { alert('Carica prima la lista atleti.'); return; }
+    const p = mese.split('-').map(Number);
+    const anno = p[0], m = p[1];
+    const nGiorni = new Date(anno, m, 0).getDate();
+    const nomeMese = new Date(anno, m - 1, 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase();
+
+    const box = document.getElementById('foglioStampa');
+    box.innerHTML = '';
+    gruppiFoglio().forEach(g => {
+        const pagina = document.createElement('div');
+        pagina.className = 'foglio-pagina';
+
+        const titolo = document.createElement('div');
+        titolo.className = 'foglio-titolo';
+        titolo.textContent = nomeMese;
+        pagina.appendChild(titolo);
+
+        const gruppo = document.createElement('div');
+        gruppo.className = 'foglio-gruppo';
+        gruppo.textContent = g.titolo;
+        pagina.appendChild(gruppo);
+
+        const sotto = document.createElement('div');
+        sotto.className = 'foglio-sotto';
+        sotto.textContent = "ASD VALL'IPPARI VITTORIA BASKET";
+        pagina.appendChild(sotto);
+
+        pagina.appendChild(tabellaFoglio(g.atleti, anno, m, nGiorni));
+        box.appendChild(pagina);
+    });
+
+    document.body.classList.add('stampa-foglio');
+    window.print();
+}
+
+document.getElementById('btnFoglio').onclick = creaFoglio;
+// La classe 'stampa-foglio' agisce solo in stampa: la lascio attiva (su iPhone la stampa parte in ritardo
+// e se la togliessi subito uscirebbe la pagina normale). Il pulsante STAMPA la rimuove.
+
+/* ---------- AVVIO ---------- */
+try { document.getElementById('nomeCoach').value = localStorage.getItem(COACH_KEY) || ''; } catch (e) {}
+document.getElementById('meseFoglio').value = oggi.slice(0, 7);
+aggiornaListaBackup();
+caricaAtletiSalvati();
+caricaGiorno(oggi);
+</script>
+</body>
+</html>
