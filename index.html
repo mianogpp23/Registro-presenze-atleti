@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Registro Minibasket iOS</title>
+<title>Registro Minibasket</title>
 <style>
-/* TEMA VERDE SMERALDO OTTIMIZZATO IPHONE */
+/* TEMA VERDE SMERALDO */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: #50C878; color: white; margin: 0; padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom) 10px;
+    max-width: 760px; margin-left: auto; margin-right: auto;
 }
 h1 { text-align: center; font-size: 1.4rem; margin: 15px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
 .card {
@@ -28,37 +29,45 @@ table { width: 100%; border-collapse: collapse; margin-top: 10px; }
 th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eee; }
 th { background: #f8f9fa; color: #666; font-size: 0.75rem; text-transform: uppercase; }
 
+/* TESTATA CON LOGO */
+.testata { display: flex; align-items: center; gap: 12px; margin: 12px 0 8px 0; }
+.testata img {
+    width: 66px; height: 66px; border-radius: 50%; flex: none; background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25); object-fit: cover;
+}
+.testata h1 { margin: 0; flex: 1; font-size: 1.25rem; }
+
+/* COACH E DATA GRANDI AL CENTRO */
+.riga-grande { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 10px 0; }
+.riga-grande label { margin: 0; font-size: 1.4rem; font-weight: 800; color: #2e7d32; }
+.riga-grande input { width: 62%; font-size: 20px; font-weight: 700; text-align: center; padding: 14px 10px; }
+
+/* SEZIONI */
+.titolo-sezione { text-align: center; font-size: 1.4rem; font-weight: 800; color: #2e7d32; margin: 0 0 8px 0; }
+.stato-lista { background: #f1f3f4; padding: 10px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; color: #555; text-align: center; }
+.pannello { display: none; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; margin-top: 8px; }
+.pannello.aperto { display: block; }
+.dettaglio { font-size: 0.8rem; color: #555; margin: 6px 0 8px 0; word-break: break-word; }
+
 /* STATI ATLETI */
-.atleta-row { -webkit-user-select: none; user-select: none; }
-.atleta-row select { margin-top: 6px; padding: 8px; font-weight: normal; }
+.atleta-row { -webkit-user-select: none; user-select: none; cursor: pointer; }
 .atleta-row.presente { background: #eaffef; font-weight: bold; color: #1b5e20; }
 .check-mark { font-size: 1.2rem; color: #ddd; }
 .presente .check-mark { color: #50C878; }
 
-/* BOTTONI IPHONE STYLE */
+/* BOTTONI */
 .btn {
     display: flex; align-items: center; justify-content: center;
     padding: 14px; border: none; border-radius: 12px;
     font-weight: 700; color: white; text-align: center;
-    font-size: 13px; margin: 5px 0; width: 100%; text-transform: uppercase;
+    font-size: 13px; margin: 5px 0; width: 100%; text-transform: uppercase; cursor: pointer;
 }
 .btn:active { opacity: 0.7; transform: scale(0.98); }
+.btn-grande { padding: 18px; font-size: 15px; }
 .btn-save { background: #2e7d32; }
 .btn-print { background: #007bff; }
 .btn-reset { background: #d32f2f; }
-.btn-history { background: #17a2b8; }
-.btn-backup { background: #673ab7; }
-.btn-stats { background: #ff9800; }
-
-#anteprimaBox {
-    background: #f1f3f4; padding: 12px; border-radius: 10px;
-    margin-top: 10px; border: 1px solid #ddd; font-family: "Courier New", monospace;
-    font-size: 0.85rem; color: #333; white-space: pre-wrap;
-    word-break: break-word;
-}
-#statsResult { margin-top: 15px; border-top: 2px solid #ff9800; padding-top: 10px; display: none; }
-.ranking-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-.badge { background: #ff9800; color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+.btn-whatsapp { background: #25a244; }
 
 /* GUIDA "COME FUNZIONA" */
 details.guida { margin: 10px 0; }
@@ -78,24 +87,23 @@ details.guida[open] summary { margin-bottom: 10px; }
 .guida-box h3:first-child { margin-top: 0; }
 .guida-box p { margin: 0 0 6px 0; }
 
-@media print {
-    .no-print { display: none !important; }
-    body { background: white !important; color: black !important; padding: 0; }
-    .card { box-shadow: none; border: none; width: 100%; padding: 0; }
-    .atleta-row:not(.presente) { display: none !important; }
-    .print-header { display: block !important; text-align: center; }
+/* PIÈ DI PAGINA */
+.piede {
+    margin: 15px 0 25px 0; padding: 18px 16px; background: #1b5e20; color: #fff; border-radius: 14px;
+    text-align: center; font-size: 1.15rem; font-weight: 800; line-height: 1.4; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
-.print-header { display: none; }
 
 /* FOGLIO PRESENZE STAMPABILE */
 @page { size: A4 portrait; margin: 10mm; }
 #foglioStampa { display: none; }
+.foglio-testa { position: relative; min-height: 22mm; margin-bottom: 4px; }
+.foglio-testa img { position: absolute; left: 0; top: 0; width: 20mm; height: 20mm; border-radius: 50%; object-fit: cover; }
 .foglio-titolo { text-align: center; font-size: 30px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: 1px; }
 .foglio-gruppo { text-align: center; font-size: 18px; font-weight: 800; margin: 0 0 2px 0; }
 .foglio-sotto { text-align: center; font-size: 11px; margin: 0 0 10px 0; }
 .foglio-pagina + .foglio-pagina { page-break-before: always; break-before: page; }
-#foglioStampa table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 0; }
 #foglioStampa * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+#foglioStampa table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 0; }
 #foglioStampa th, #foglioStampa td { border: 1px solid #333; padding: 0; text-align: center; font-size: 9px; color: #000; background: #fff; }
 #foglioStampa th { height: 9mm; background: #d9d9d9; font-weight: 700; }
 #foglioStampa td { height: 7mm; }
@@ -107,132 +115,134 @@ details.guida[open] summary { margin-bottom: 10px; }
 #foglioStampa thead { display: table-header-group; }
 #foglioStampa tr { page-break-inside: avoid; }
 @media print {
+    .no-print { display: none !important; }
+    body { background: white !important; color: black !important; padding: 0; max-width: none; }
     body.stampa-foglio > *:not(#foglioStampa) { display: none !important; }
     body.stampa-foglio #foglioStampa { display: block !important; }
 }
-.piede { margin: 15px 0 25px 0; padding: 18px 16px; background: #1b5e20; color: #fff; border-radius: 14px; text-align: center; font-size: 1.15rem; font-weight: 800; line-height: 1.4; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-.piede small { display: block; margin-top: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.9; }
 </style>
 </head>
 <body>
 
-<h1>🏀 REGISTRO PRESENZE VALL'IPPARI BASKET</h1>
+<div class="testata no-print">
+    <img id="logoTesta" alt="Logo Basket Vittoria Vall d'Ippari">
+    <h1>🏀 REGISTRO PRESENZE VALL'IPPARI BASKET</h1>
+</div>
 
 <details class="guida no-print">
     <summary>❓ Come funziona</summary>
     <div class="guida-box">
-        <h3>📋 Lista atleti</h3>
-        <p><b>📂 Carica</b>: apre un file JSON con gli atleti e lo salva nel telefono.</p>
-        <p><b>📥 Scarica</b>: salva la lista attuale in un file atleti.json.</p>
-        <p><b>🗑 Rimuovi</b>: toglie la lista atleti dal telefono. Le presenze salvate restano.</p>
-        <p><b>✏️ Crea/Modifica</b>: apre la pagina dove si crea o si modifica la lista.</p>
+        <h3>👤 Coach e data</h3>
+        <p><b>Coach</b>: scrivi il tuo nome, si salva da solo. Compare nel file che invii su WhatsApp.</p>
+        <p><b>Data</b>: il giorno a cui si riferiscono le presenze. Cambiandola vedi i segni dell'ultimo salvataggio di quel giorno. Se hai presenze non salvate, ti avvisa prima di cambiare.</p>
 
-        <h3>🔄 Sincronizzare i coach</h3>
-        <p><b>Condividi coach</b>: manda le tue presenze salvate agli altri coach (es. su WhatsApp). Serve aver scritto il tuo nome nel campo <b>Coach</b>, che compare anche nell'anteprima WhatsApp.</p>
-        <p><b>Unisci da coach</b>: apre il file ricevuto e lo unisce alle tue presenze, senza cancellare niente. Prima di unire mostra un riepilogo (con il nome del coach che ha inviato il file) e chiede conferma.</p>
-        <p><b>Backup automatici</b>: prima di ogni unione l'app salva da sola una copia dello storico (le ultime 3). Se l'unione era sbagliata, scegli la copia nel menù e tocca <b>Ripristina</b>. Con <b>Ripristina da file</b> scegli invece un file di presenze qualsiasi dal telefono: tutto lo storico viene sostituito (prima se ne salva una copia). Le copie sono nello stesso telefono, quindi non sostituiscono un backup esterno.</p>
+        <h3>📋 Gestione lista atleti</h3>
+        <p><b>Carica lista</b>: apre un file JSON con gli atleti e lo salva nel telefono.</p>
+        <p><b>Scarica lista</b>: salva la lista attuale in un file atleti.json.</p>
+        <p><b>Rimuovi lista</b>: toglie la lista atleti dal telefono. Le presenze salvate restano.</p>
+
+        <h3>👥 Gestione atleti</h3>
+        <p><b>Aggiungi atleta</b>: inserisci nome, anno di nascita e, se serve, una categoria diversa da quella automatica.</p>
+        <p><b>Modifica atleta</b>: scegli l'atleta e cambia nome, anno o categoria. Se cambi il nome, si aggiorna anche nei salvataggi.</p>
+        <p><b>Rimuovi atleta</b>: toglie l'atleta dalla lista. Le presenze già salvate restano.</p>
 
         <h3>✅ Presenze</h3>
-        <p><b>Data odierna</b>: il giorno a cui si riferiscono le presenze. Cambiandola vedi quelle già salvate per quel giorno.</p>
-        <p><b>Giorni salvati</b>: menù con tutti i giorni che hanno presenze salvate, dal più recente. Scegline uno per caricarlo e modificarlo, poi tocca Salva.</p>
         <p><b>Gruppo</b>: mostra solo una categoria. Le categorie si calcolano dall'anno di nascita e slittano da sole a settembre.</p>
-        <p><b>Modifica categorie</b>: mostra un menù a tendina accanto a ogni nome. Scegli una categoria per usare quella, oppure "Automatica" per tornare a quella calcolata dall'anno di nascita. Toccalo di nuovo per chiudere. Con "Scarica" la categoria resta nel file della lista.</p>
         <p><b>Tocca un nome</b>: segna o toglie la presenza dell'atleta.</p>
-        <p><b>Salva</b>: registra le presenze del giorno. Senza salvare i segni restano solo sullo schermo e si perdono se cambi data o chiudi l'app.</p>
-        <p><b>Stampa</b>: stampa il foglio con i soli presenti. Non salva niente.</p>
-        <p><b>Reset lista</b>: toglie i segni dallo schermo. Quello che avevi già salvato resta, a meno che tu non tocchi Salva subito dopo e confermi l'eliminazione.</p>
+        <p><b>Salva presenze di oggi</b>: aggiunge un nuovo salvataggio per la data scelta. Non sostituisce quelli precedenti.</p>
+        <p><b>Salvataggi di oggi</b>: elenco dei salvataggi della data scelta, dal più recente. Scegli quello su cui lavorare.</p>
+        <p><b>Invia su staff WhatsApp</b>: crea il file JSON del salvataggio scelto, con data e nome coach, e apre la condivisione. Il gruppo lo scegli tu.</p>
+        <p><b>Cancella salvataggio</b>: elimina solo il salvataggio scelto, dopo una conferma.</p>
 
         <h3>🖨 Foglio presenze stampabile</h3>
-        <p><b>Crea foglio</b>: scegli il mese e tocca il pulsante. Si apre la stampa di tutto il mese con tutti gli atleti: una pagina per ogni gruppo, con il mese in alto e una colonna per ogni giorno. È una tabella tipo foglio Excel: una riga per atleta, una colonna per giorno dove mettere la X e una colonna TOT. Serve per compilarlo a mano, non usa le presenze segnate nell'app. Dalla schermata di stampa puoi salvare il PDF.</p>
-
-        <h3>📊 Statistiche mensili</h3>
-        <p><b>Vedi</b>: per il mese scelto mostra quanti allenamenti ci sono stati e quante presenze ha fatto ogni atleta.</p>
+        <p><b>Crea foglio</b>: scegli il mese e tocca il pulsante. Si apre la stampa di tutto il mese con tutti gli atleti: una pagina per ogni gruppo, in una tabella tipo foglio Excel con una colonna per giorno dove mettere la X e una colonna TOT. Serve per compilarlo a mano. Dalla schermata di stampa puoi salvare il PDF.</p>
     </div>
 </details>
 
 <div class="card no-print">
-    <label>📋 LISTA ATLETI</label>
-    <div id="statoAtleti" style="background:#f1f3f4; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.85rem; color:#666; text-align:center">
-        Nessuna lista caricata
+    <div class="riga-grande">
+        <label for="nomeCoach">COACH</label>
+        <input type="text" id="nomeCoach" maxlength="40" placeholder="Il tuo nome">
     </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap">
-        <button class="btn" style="background:#1565c0; flex:1; min-width:90px" id="btnCaricaAtleti">📂 Carica</button>
-        <button class="btn" style="background:#2e7d32; flex:1; min-width:90px" id="btnScaricaAtleti">📥 Scarica</button>
-        <button class="btn" style="background:#d32f2f; flex:1; min-width:90px" id="btnRimuoviAtleti">🗑 Rimuovi</button>
-        <button class="btn btn-backup" id="btnExport" style="flex:1; min-width:90px">Condividi coach</button>
-        <button class="btn" style="background:#546e7a; flex:1; min-width:90px" id="btnFakeImport">Unisci da coach</button>
-        <a href="https://mianogpp23.github.io/atleti-manager/" target="_blank" class="btn" style="background:#ff9800;flex:1;min-width:90px;text-decoration:none;display:flex">✏️ Crea/Modifica</a>
-    </div>
-    <input type="file" id="importFile" style="visibility:hidden; width:0; height:0;">
-    <input type="file" id="caricaAtletiFile" style="visibility:hidden; width:0; height:0;" accept=".json">
-
-    <div style="margin-top:12px; border-top:1px solid #eee; padding-top:10px;">
-        <label>BACKUP AUTOMATICI (prima di ogni unione)</label>
-        <div style="display:flex; gap:5px;">
-            <select id="listaBackup"></select>
-            <button class="btn btn-stats" id="btnRipristina" style="width:120px; margin:0">RIPRISTINA</button>
-        </div>
-        <button class="btn" id="btnRipristinaFile" style="background:#546e7a">📂 Ripristina da file</button>
-        <input type="file" id="ripristinaFile" style="visibility:hidden; width:0; height:0;">
+    <div class="riga-grande">
+        <label for="dataAllenamento">DATA</label>
+        <input type="date" id="dataAllenamento">
     </div>
 </div>
 
 <div class="card no-print">
-    <label>COACH</label>
-    <input type="text" id="nomeCoach" maxlength="40" placeholder="Il tuo nome">
-    <label>DATA ODIERNA</label>
-    <input type="date" id="dataAllenamento">
-    <label>GIORNI SALVATI (per modificare)</label>
-    <select id="giorniSalvati"></select>
-    <label>GRUPPO</label>
-    <select id="filtroCat"></select>
-    <button class="btn btn-backup" id="btnModificaCat" style="margin-top:10px">✏️ Modifica categorie</button>
+    <div class="titolo-sezione">GESTIONE LISTA ATLETI</div>
+    <div id="statoAtleti" class="stato-lista">Nessuna lista caricata</div>
+    <button class="btn btn-grande" style="background:#1565c0" id="btnCaricaAtleti">📂 Carica lista</button>
+    <button class="btn btn-grande" style="background:#2e7d32" id="btnScaricaAtleti">📥 Scarica lista</button>
+    <button class="btn btn-grande" style="background:#d32f2f" id="btnRimuoviAtleti">🗑 Rimuovi lista</button>
+    <input type="file" id="caricaAtletiFile" style="visibility:hidden; width:0; height:0; padding:0; border:0;">
 </div>
 
-<div class="card">
-    <div class="print-header">
-        <h2 style="margin:0">ASD VALL'IPPARI VITTORIA BASKET</h2>
-        <p id="dataStampaHeader" style="font-weight:bold;"></p>
-        <hr>
+<div class="card no-print">
+    <div class="titolo-sezione">GESTIONE ATLETI</div>
+    <button class="btn" style="background:#2e7d32" id="btnAggiungi">➕ Aggiungi atleta</button>
+    <div class="pannello" id="pnlAggiungi">
+        <label>NOME E COGNOME</label>
+        <input type="text" id="addNome" maxlength="60" placeholder="Cognome Nome">
+        <label>ANNO DI NASCITA</label>
+        <input type="number" id="addAnno" inputmode="numeric" placeholder="es. 2016">
+        <label>CATEGORIA</label>
+        <select id="addCat"></select>
+        <button class="btn btn-save" id="btnConfermaAggiungi">Aggiungi alla lista</button>
     </div>
+
+    <button class="btn" style="background:#ff9800" id="btnModifica">✏️ Modifica atleta</button>
+    <div class="pannello" id="pnlModifica">
+        <label>ATLETA</label>
+        <select id="modSel"></select>
+        <label>NOME E COGNOME</label>
+        <input type="text" id="modNome" maxlength="60">
+        <label>ANNO DI NASCITA</label>
+        <input type="number" id="modAnno" inputmode="numeric">
+        <label>CATEGORIA</label>
+        <select id="modCat"></select>
+        <button class="btn btn-save" id="btnConfermaModifica">Salva modifiche</button>
+    </div>
+
+    <button class="btn" style="background:#d32f2f" id="btnRimuovi">➖ Rimuovi atleta</button>
+    <div class="pannello" id="pnlRimuovi">
+        <label>ATLETA</label>
+        <select id="remSel"></select>
+        <button class="btn btn-reset" id="btnConfermaRimuovi">Rimuovi dalla lista</button>
+    </div>
+</div>
+
+<div class="card no-print" id="cardPresenze">
+    <label>GRUPPO</label>
+    <select id="filtroCat"></select>
 
     <table>
         <thead>
             <tr>
                 <th style="width:60%">Atleta</th>
                 <th style="width:20%">Anno</th>
-                <th class="no-print" style="width:20%; text-align:center">Ok</th>
+                <th style="width:20%; text-align:center">Ok</th>
             </tr>
         </thead>
         <tbody id="atletiBody"></tbody>
     </table>
+    <div id="contaPresenti" style="margin-top:8px; font-weight:700; color:#2e7d32; text-align:right;"></div>
 
-    <div class="no-print" style="margin-top:20px;">
-        <label>ANTEPRIMA WHATSAPP</label>
-        <div id="anteprimaBox">Tocca un nome per iniziare...</div>
-    </div>
+    <div style="margin-top:12px; border-top:1px solid #eee; padding-top:10px;">
+        <button class="btn btn-save btn-grande" id="btnSalva">💾 Salva presenze di oggi</button>
 
-    <div class="no-print" style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-        <button class="btn btn-save" id="btnSalva">SALVA</button>
-        <button class="btn btn-print" onclick="preparaStampa()">STAMPA</button>
-        <button class="btn btn-reset" id="btnReset" style="grid-column: span 2;">RESET LISTA</button>
-    </div>
-</div>
+        <label>SALVATAGGI DI OGGI</label>
+        <select id="listaSalvataggi"></select>
+        <div class="dettaglio" id="dettaglioSalvataggio"></div>
 
-<div class="card no-print">
-    <h2 style="margin:0; font-size: 1.1rem; color:#ff9800;">📊 STATISTICHE MENSILI</h2>
-    <div style="display:flex; gap:10px; margin-top:10px;">
-        <input type="month" id="meseStats">
-        <button class="btn btn-stats" id="btnCalcolaStats" style="width:110px; margin:0">VEDI</button>
-    </div>
-    <div id="statsResult">
-        <div id="totAllenamentiMese" style="font-weight:bold; margin-bottom:10px; color:#e65100;"></div>
-        <div id="listaRanking"></div>
+        <button class="btn btn-whatsapp btn-grande" id="btnInvia">📤 Invia su staff WhatsApp</button>
+        <button class="btn btn-reset" id="btnCancellaSalvataggio">🗑 Cancella salvataggio</button>
     </div>
 </div>
 
 <div class="card no-print">
-    <h2 style="margin:0; font-size: 1.1rem; color:#2e7d32;">🖨 FOGLIO PRESENZE STAMPABILE</h2>
+    <div class="titolo-sezione" style="font-size:1.15rem;">🖨 FOGLIO PRESENZE STAMPABILE</div>
     <div style="display:flex; gap:10px; margin-top:10px;">
         <input type="month" id="meseFoglio">
         <button class="btn btn-print" id="btnFoglio" style="width:130px; margin:0">CREA FOGLIO</button>
@@ -247,21 +257,52 @@ details.guida[open] summary { margin-bottom: 10px; }
 </div>
 
 <script>
+const $ = id => document.getElementById(id);
+
+/* ---------- STATO ---------- */
 let atleti = [];
 let presenze = new Set();
 let dataCorrente = '';      // data a cui si riferiscono le presenze sullo schermo
 let modificato = false;     // true se ci sono presenze non ancora salvate
 
-let modCat = false;         // true quando si stanno modificando le categorie
-
-const DB_KEY = 'vbasket_safari_v1';
 const ATLETA_KEY = 'vbasket_atleti_v1';
-const BACKUP_KEY = 'vbasket_backup_v1';
 const COACH_KEY = 'vbasket_coach_v1';
+const OLD_DB_KEY = 'vbasket_safari_v1';     // storico della versione precedente (un giorno = una voce)
+const SALV_KEY = 'vbasket_salvataggi_v2';   // salvataggi multipli
+const LOGO_SRC = 'data:image/jpeg;base64,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';
+
+/* ---------- UTILITY ---------- */
+
+function norm(s) { return String(s || '').trim().toLowerCase(); }
+
+// Data locale AAAA-MM-GG (toISOString usa UTC e di notte sbaglia giorno)
+function oggiLocale() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function dataIt(d) {
+    const p = d.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function nomeCoach() { return ($('nomeCoach').value || '').trim().slice(0, 40); }
+
+function scaricaTesto(testo, filename) {
+    const blob = new Blob([testo], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
 /* ---------- CATEGORIE ---------- */
 
-// La stagione cambia a settembre: da settembre 2026 a agosto 2027 è la stagione 2026
+// La stagione cambia a settembre: da settembre 2026 ad agosto 2027 è la stagione 2026
 const STAGIONE = (function() {
     const d = new Date();
     return d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
@@ -275,8 +316,6 @@ const CATEGORIE = [
     { nome: 'Under 13',   anni: [STAGIONE - 12, STAGIONE - 11] }
 ];
 
-function norm(s) { return String(s || '').trim().toLowerCase(); }
-
 // Categoria manuale se presente, altrimenti quella calcolata dall'anno di nascita
 function categoriaDi(atleta) {
     if (atleta.c) return atleta.c;
@@ -285,7 +324,7 @@ function categoriaDi(atleta) {
 }
 
 function costruisciFiltro() {
-    const sel = document.getElementById('filtroCat');
+    const sel = $('filtroCat');
     const precedente = sel.value || 'tutti';
     sel.innerHTML = '';
     const aggiungi = (valore, testo) => {
@@ -300,7 +339,6 @@ function costruisciFiltro() {
         viste.add(norm(c.nome));
         aggiungi(norm(c.nome), c.nome.toUpperCase() + ' (' + c.anni[0] + '-' + String(c.anni[1]).slice(2) + ')');
     });
-    // categorie scritte a mano che non sono tra quelle standard
     atleti.forEach(a => {
         if (a.c && !viste.has(norm(a.c))) {
             viste.add(norm(a.c));
@@ -310,98 +348,23 @@ function costruisciFiltro() {
     sel.value = Array.from(sel.options).some(o => o.value === precedente) ? precedente : 'tutti';
 }
 
-function salvaAtleti() {
-    try { localStorage.setItem(ATLETA_KEY, JSON.stringify(atleti)); }
-    catch (e) { alert('Impossibile salvare: ' + e.message); }
-}
-
-/* ---------- UTILITY ---------- */
-
-// Data locale AAAA-MM-GG (toISOString usa UTC e di notte sbaglia giorno)
-function oggiLocale() {
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
-
-function leggiRegistro() {
-    try {
-        const reg = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
-        return (reg && typeof reg === 'object' && !Array.isArray(reg)) ? reg : {};
-    } catch (e) { return {}; }
-}
-
-function scriviRegistro(reg) {
-    try {
-        localStorage.setItem(DB_KEY, JSON.stringify(reg));
-        return true;
-    } catch (e) {
-        alert('Impossibile salvare: ' + e.message);
-        return false;
-    }
-}
-
-function nomeCoach() {
-    return (document.getElementById('nomeCoach').value || '').trim().slice(0, 40);
-}
-
-function formattaOra(iso) {
-    return new Date(iso).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-// Backup automatici: si tengono gli ultimi 3 (creati prima di ogni unione o ripristino)
-function leggiBackup() {
-    try {
-        const b = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
-        return Array.isArray(b) ? b : [];
-    } catch (e) { return []; }
-}
-
-function creaBackup(motivo) {
-    const reg = leggiRegistro();
-    if (Object.keys(reg).length === 0) return true; // niente da salvare
-    try {
-        const lista = leggiBackup();
-        lista.unshift({ ts: new Date().toISOString(), motivo: motivo, registro: reg });
-        localStorage.setItem(BACKUP_KEY, JSON.stringify(lista.slice(0, 3)));
-        aggiornaListaBackup();
-        return true;
-    } catch (e) {
-        alert('Impossibile creare il backup: ' + e.message);
-        return false;
-    }
-}
-
-function aggiornaListaBackup() {
-    const sel = document.getElementById('listaBackup');
-    const lista = leggiBackup();
+// Riempie un menù categoria: "Automatica" + categorie standard + eventuali categorie già usate
+function opzioniCategoria(sel, valore) {
     sel.innerHTML = '';
-    const primo = document.createElement('option');
-    primo.value = '';
-    primo.textContent = lista.length ? '— scegli un backup —' : 'Nessun backup';
-    sel.appendChild(primo);
-    lista.forEach((b, i) => {
-        const n = b && b.registro ? Object.keys(b.registro).length : 0;
+    const agg = (v, t) => {
         const o = document.createElement('option');
-        o.value = String(i);
-        o.textContent = formattaOra(b.ts) + ' · ' + n + ' giorni · prima ' + (b.motivo === 'ripristino' ? 'ripristino' : 'unione');
+        o.value = v;
+        o.textContent = t;
         sel.appendChild(o);
+    };
+    agg('', "Automatica (dall'anno di nascita)");
+    const viste = new Set();
+    CATEGORIE.forEach(c => { viste.add(norm(c.nome)); agg(c.nome, c.nome); });
+    atleti.forEach(a => {
+        if (a.c && !viste.has(norm(a.c))) { viste.add(norm(a.c)); agg(a.c, a.c); }
     });
-}
-
-function scaricaTesto(testo, filename) {
-    const blob = new Blob([testo], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function scaricaJSON(data, filename) {
-    scaricaTesto(JSON.stringify(data, null, 2), filename);
+    const trovato = Array.from(sel.options).find(o => valore && norm(o.value) === norm(valore));
+    sel.value = trovato ? trovato.value : '';
 }
 
 /* ---------- LISTA ATLETI ---------- */
@@ -423,41 +386,48 @@ function validaAtleti(data) {
     });
 }
 
+function salvaAtleti() {
+    try {
+        if (atleti.length) localStorage.setItem(ATLETA_KEY, JSON.stringify(atleti));
+        else localStorage.removeItem(ATLETA_KEY);
+    } catch (e) { alert('Impossibile salvare: ' + e.message); }
+}
+
 function caricaAtletiSalvati() {
     try {
         const data = localStorage.getItem(ATLETA_KEY);
-        if (data) {
-            atleti = validaAtleti(JSON.parse(data)).sort((a, b) => a.n.localeCompare(b.n));
-        }
-    } catch(e) { atleti = []; }
+        if (data) atleti = validaAtleti(JSON.parse(data)).sort((a, b) => a.n.localeCompare(b.n, 'it'));
+    } catch (e) { atleti = []; }
     aggiornaStatoAtleti();
 }
 
 function aggiornaStatoAtleti() {
-    const el = document.getElementById('statoAtleti');
-    const btnCat = document.getElementById('btnModificaCat');
+    const el = $('statoAtleti');
     costruisciFiltro();
     if (atleti.length > 0) {
         el.innerHTML = '✅ <strong>' + atleti.length + '</strong> atleti caricati';
-        document.getElementById('filtroCat').style.display = '';
-        btnCat.style.display = '';
+        $('filtroCat').style.display = '';
     } else {
-        el.textContent = '⚠️ Nessuna lista caricata. Usa "📂 Carica" per caricare un file JSON.';
-        document.getElementById('filtroCat').style.display = 'none';
-        btnCat.style.display = 'none';
-        modCat = false;
-        btnCat.textContent = '✏️ Modifica categorie';
+        el.textContent = '⚠️ Nessuna lista caricata. Usa "Carica lista" oppure "Aggiungi atleta".';
+        $('filtroCat').style.display = 'none';
     }
+    aggiornaSelAtleti();
+    opzioniCategoria($('addCat'), $('addCat').value);
     render();
+}
+
+function aggiornaTuttoAtleti() {
+    atleti.sort((a, b) => a.n.localeCompare(b.n, 'it'));
+    salvaAtleti();
+    aggiornaStatoAtleti();
 }
 
 function caricaDaFileJSON(file) {
     const r = new FileReader();
     r.onload = function(ev) {
         try {
-            const lista = validaAtleti(JSON.parse(ev.target.result));
-            atleti = lista.sort((a, b) => a.n.localeCompare(b.n));
-            localStorage.setItem(ATLETA_KEY, JSON.stringify(atleti));
+            atleti = validaAtleti(JSON.parse(ev.target.result)).sort((a, b) => a.n.localeCompare(b.n, 'it'));
+            salvaAtleti();
             aggiornaStatoAtleti();
             alert('✅ Caricati ' + atleti.length + ' atleti!');
         } catch(e) {
@@ -467,121 +437,241 @@ function caricaDaFileJSON(file) {
     r.readAsText(file);
 }
 
-/* ---------- PRESENZE ---------- */
+$('btnCaricaAtleti').onclick = () => $('caricaAtletiFile').click();
 
-function caricaGiorno(data) {
-    const reg = leggiRegistro();
-    presenze = new Set(reg[data] || []);
+$('caricaAtletiFile').onchange = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (f) caricaDaFileJSON(f);
+};
+
+$('btnScaricaAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da scaricare.'); return; }
+    scaricaTesto(JSON.stringify(atleti, null, 2), 'atleti.json');
+};
+
+$('btnRimuoviAtleti').onclick = () => {
+    if (atleti.length === 0) { alert('Nessuna lista da rimuovere.'); return; }
+    if (!confirm('Rimuovere la lista atleti? Dovrai ricaricare il file JSON.\n\nLe presenze salvate restano.')) return;
+    atleti = [];
+    salvaAtleti();
+    presenze.clear();
     modificato = false;
-    dataCorrente = data;
-    aggiornaGiorniSalvati();
-    aggiornaAnteprima();
+    aggiornaStatoAtleti();
+};
+
+/* ---------- GESTIONE ATLETI (aggiungi / modifica / rimuovi) ---------- */
+
+const PANNELLI = ['pnlAggiungi', 'pnlModifica', 'pnlRimuovi'];
+
+function mostraPannello(id) {
+    PANNELLI.forEach(p => {
+        const el = $(p);
+        if (p === id) el.classList.toggle('aperto');
+        else el.classList.remove('aperto');
+    });
 }
 
-// Menù a tendina con i giorni che hanno presenze salvate (dal più recente)
-function aggiornaGiorniSalvati() {
-    const sel = document.getElementById('giorniSalvati');
-    const reg = leggiRegistro();
-    const giorni = Object.keys(reg).filter(d => Array.isArray(reg[d])).sort().reverse();
+function aggiornaSelAtleti() {
+    ['modSel', 'remSel'].forEach(id => {
+        const sel = $(id);
+        const prec = sel.value;
+        sel.innerHTML = '';
+        atleti.forEach(a => {
+            const o = document.createElement('option');
+            o.value = a.n;
+            o.textContent = a.n + ' (' + a.a + ')';
+            sel.appendChild(o);
+        });
+        if (atleti.some(a => a.n === prec)) sel.value = prec;
+    });
+    popolaModifica();
+}
+
+function popolaModifica() {
+    const a = atleti.find(x => x.n === $('modSel').value);
+    $('modNome').value = a ? a.n : '';
+    $('modAnno').value = a ? a.a : '';
+    opzioniCategoria($('modCat'), a && a.c);
+}
+
+function leggiDatiAtleta(idNome, idAnno) {
+    const nome = $(idNome).value.trim().replace(/\s+/g, ' ').slice(0, 60);
+    const anno = Number($(idAnno).value);
+    if (!nome) { alert('Scrivi il nome e cognome.'); return null; }
+    if (!Number.isInteger(anno) || anno < 1990 || anno > new Date().getFullYear()) {
+        alert('Anno di nascita non valido.');
+        return null;
+    }
+    return { nome: nome, anno: anno };
+}
+
+$('btnAggiungi').onclick = () => mostraPannello('pnlAggiungi');
+
+$('btnModifica').onclick = () => {
+    if (atleti.length === 0) { alert('Carica prima la lista atleti o aggiungi un atleta.'); return; }
+    mostraPannello('pnlModifica');
+};
+
+$('btnRimuovi').onclick = () => {
+    if (atleti.length === 0) { alert('Carica prima la lista atleti o aggiungi un atleta.'); return; }
+    mostraPannello('pnlRimuovi');
+};
+
+$('modSel').onchange = popolaModifica;
+
+$('btnConfermaAggiungi').onclick = () => {
+    const d = leggiDatiAtleta('addNome', 'addAnno');
+    if (!d) return;
+    if (atleti.some(a => norm(a.n) === norm(d.nome))) {
+        alert('Esiste già un atleta con questo nome. Se sono due omonimi, aggiungi una differenza (es. un\'iniziale).');
+        return;
+    }
+    const atleta = { n: d.nome, a: d.anno };
+    const cat = $('addCat').value;
+    if (cat) atleta.c = cat;
+    atleti.push(atleta);
+    aggiornaTuttoAtleti();
+    $('addNome').value = '';
+    $('addAnno').value = '';
+    opzioniCategoria($('addCat'), '');
+    alert('✅ ' + d.nome + ' aggiunto alla lista.');
+};
+
+$('btnConfermaModifica').onclick = () => {
+    const a = atleti.find(x => x.n === $('modSel').value);
+    if (!a) { alert('Scegli un atleta.'); return; }
+    const d = leggiDatiAtleta('modNome', 'modAnno');
+    if (!d) return;
+    if (atleti.some(x => x !== a && norm(x.n) === norm(d.nome))) {
+        alert('Esiste già un altro atleta con questo nome.');
+        return;
+    }
+    const vecchio = a.n;
+    a.n = d.nome;
+    a.a = d.anno;
+    const cat = $('modCat').value;
+    if (cat) a.c = cat; else delete a.c;
+    if (d.nome !== vecchio) {
+        // il nome cambia anche nei salvataggi e sullo schermo, così lo storico resta collegato
+        const salv = leggiSalvataggi();
+        salv.forEach(s => { s.presenti = s.presenti.map(n => n === vecchio ? d.nome : n); });
+        scriviSalvataggi(salv);
+        if (presenze.has(vecchio)) { presenze.delete(vecchio); presenze.add(d.nome); }
+    }
+    aggiornaTuttoAtleti();
+    $('modSel').value = d.nome;
+    popolaModifica();
+    aggiornaSalvataggi($('listaSalvataggi').value);
+    alert('✅ Modifiche salvate.');
+};
+
+$('btnConfermaRimuovi').onclick = () => {
+    const nome = $('remSel').value;
+    const a = atleti.find(x => x.n === nome);
+    if (!a) { alert('Scegli un atleta.'); return; }
+    if (!confirm('Rimuovere ' + nome + ' dalla lista?\n\nLe presenze già salvate restano nello storico.')) return;
+    atleti = atleti.filter(x => x !== a);
+    presenze.delete(nome);
+    aggiornaTuttoAtleti();
+    alert(nome + ' rimosso dalla lista.');
+};
+
+/* ---------- SALVATAGGI (più di uno per giorno) ---------- */
+
+function scriviSalvataggi(lista) {
+    try {
+        localStorage.setItem(SALV_KEY, JSON.stringify(lista));
+        return true;
+    } catch (e) {
+        alert('Impossibile salvare: ' + e.message);
+        return false;
+    }
+}
+
+function leggiSalvataggi() {
+    try {
+        const a = JSON.parse(localStorage.getItem(SALV_KEY) || 'null');
+        if (Array.isArray(a)) {
+            return a.filter(s => s && typeof s.id === 'string' && typeof s.data === 'string' && Array.isArray(s.presenti));
+        }
+    } catch (e) {}
+    // prima apertura: converto lo storico della versione precedente (una voce per giorno)
+    const migrati = [];
+    try {
+        const vecchio = JSON.parse(localStorage.getItem(OLD_DB_KEY) || '{}');
+        if (vecchio && typeof vecchio === 'object' && !Array.isArray(vecchio)) {
+            Object.keys(vecchio).sort().forEach(d => {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(d) && Array.isArray(vecchio[d]) && vecchio[d].length) {
+                    migrati.push({
+                        id: d + 'T12:00:00-storico', data: d, ts: d + 'T12:00:00', coach: '', migrato: true,
+                        presenti: vecchio[d].filter(n => typeof n === 'string')
+                    });
+                }
+            });
+        }
+    } catch (e) {}
+    if (migrati.length) scriviSalvataggi(migrati);
+    return migrati;
+}
+
+function salvataggiDelGiorno(data) {
+    return leggiSalvataggi().filter(s => s.data === data).sort((a, b) => b.ts.localeCompare(a.ts));
+}
+
+function oraDi(s) {
+    if (s.migrato) return '';
+    const d = new Date(s.ts);
+    return isNaN(d) ? '' : d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+function salvataggioSelezionato() {
+    const id = $('listaSalvataggi').value;
+    return leggiSalvataggi().find(s => s.id === id) || null;
+}
+
+function aggiornaDettaglio() {
+    const s = salvataggioSelezionato();
+    $('dettaglioSalvataggio').textContent = s
+        ? s.presenti.length + ' presenti: ' + s.presenti.slice().sort((a, b) => a.localeCompare(b, 'it')).join(', ')
+        : '';
+}
+
+// Menù dei salvataggi della data scelta: dal più recente, con l'ultimo preselezionato
+function aggiornaSalvataggi(selId) {
+    const sel = $('listaSalvataggi');
+    const lista = salvataggiDelGiorno(dataCorrente);
     sel.innerHTML = '';
-    const primo = document.createElement('option');
-    primo.value = '';
-    primo.textContent = giorni.length ? '— scegli un giorno —' : 'Nessun giorno salvato';
-    sel.appendChild(primo);
-    giorni.forEach(d => {
-        const p = d.split('-').map(Number);
-        const testo = new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('it-IT',
-            { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (lista.length === 0) {
         const o = document.createElement('option');
-        o.value = d;
-        o.textContent = testo + ' · ' + reg[d].length + ' presenti';
+        o.value = '';
+        o.textContent = 'Nessun salvataggio per questa data';
+        sel.appendChild(o);
+    }
+    lista.forEach((s, i) => {
+        const o = document.createElement('option');
+        o.value = s.id;
+        o.textContent = (s.migrato ? 'Salvataggio precedente' : oraDi(s)) + ' · ' + s.presenti.length + ' presenti' +
+            (s.coach ? ' · ' + s.coach : '') + (i === 0 ? ' (ultimo)' : '');
         sel.appendChild(o);
     });
-    sel.value = reg[dataCorrente] ? dataCorrente : '';
+    if (selId && lista.some(s => s.id === selId)) sel.value = selId;
+    else if (lista.length) sel.value = lista[0].id;
+    aggiornaDettaglio();
 }
 
-function render() {
-    const tbody = document.getElementById('atletiBody');
-    tbody.innerHTML = '';
-    const f = document.getElementById('filtroCat').value;
-    atleti.forEach(atleta => {
-        let ok = (f==='tutti') || norm(categoriaDi(atleta)) === f;
-        if(ok) {
-            const tr = document.createElement('tr');
-            tr.className = 'atleta-row' + (presenze.has(atleta.n) ? ' presente' : '');
-
-            const tdNome = document.createElement('td');
-            tdNome.appendChild(document.createTextNode(atleta.n));
-            if (modCat) {
-                const sel = document.createElement('select');
-                const auto = CATEGORIE.find(c => c.anni.includes(atleta.a));
-                const aggiungi = (valore, testo) => {
-                    const o = document.createElement('option');
-                    o.value = valore;
-                    o.textContent = testo;
-                    sel.appendChild(o);
-                };
-                aggiungi('', 'Automatica (' + (auto ? auto.nome : 'nessuna') + ')');
-                CATEGORIE.forEach(c => aggiungi(c.nome, c.nome));
-                // se l'atleta ha una categoria diversa dalle standard, resta selezionabile
-                if (atleta.c && !CATEGORIE.some(c => norm(c.nome) === norm(atleta.c))) {
-                    aggiungi(atleta.c, atleta.c);
-                }
-                const attuale = CATEGORIE.find(c => norm(c.nome) === norm(atleta.c));
-                sel.value = atleta.c ? (attuale ? attuale.nome : atleta.c) : '';
-                sel.onchange = () => {
-                    if (sel.value) atleta.c = sel.value; else delete atleta.c;
-                    salvaAtleti();
-                };
-                tdNome.appendChild(sel);
-            } else if (atleta.c) {
-                const sub = document.createElement('div');
-                sub.style.cssText = 'font-size:0.7rem; color:#888; font-weight:normal;';
-                sub.textContent = atleta.c;
-                tdNome.appendChild(sub);
-            }
-            const tdAnno = document.createElement('td');
-            tdAnno.textContent = atleta.a;
-            const tdOk = document.createElement('td');
-            tdOk.className = 'no-print';
-            tdOk.style.textAlign = 'center';
-            const mark = document.createElement('span');
-            mark.className = 'check-mark';
-            mark.textContent = presenze.has(atleta.n) ? '●' : '○';
-            tdOk.appendChild(mark);
-
-            tr.appendChild(tdNome);
-            tr.appendChild(tdAnno);
-            tr.appendChild(tdOk);
-
-            tr.onclick = (e) => {
-                if (modCat) return;
-                e.preventDefault();
-                if(presenze.has(atleta.n)) presenze.delete(atleta.n);
-                else presenze.add(atleta.n);
-                modificato = true;
-                aggiornaAnteprima();
-            };
-            tbody.appendChild(tr);
-        }
-    });
-}
-
-function aggiornaAnteprima() {
+function caricaGiorno(data) {
+    const ultimo = salvataggiDelGiorno(data)[0];
+    presenze = new Set(ultimo ? ultimo.presenti : []);
+    modificato = false;
+    dataCorrente = data;
+    aggiornaSalvataggi();
     render();
-    const arr = Array.from(presenze).sort((a, b) => a.localeCompare(b));
-    const box = document.getElementById('anteprimaBox');
-    if(arr.length > 0) {
-        const coach = nomeCoach();
-        box.innerText = `*PRESENTI ${document.getElementById('dataAllenamento').value}*\n` + (coach ? `Coach: ${coach}\n` : '') + `Totale: ${arr.length}\n----------\n- ` + arr.join('\n- ');
-    } else {
-        box.innerText = "Tocca un nome per iniziare...";
-    }
 }
 
 // Cambia giorno chiedendo conferma se ci sono presenze non salvate
 function vaiAData(data) {
-    const el = document.getElementById('dataAllenamento');
+    const el = $('dataAllenamento');
     if (!data) { el.value = dataCorrente; return false; }
     if (data !== dataCorrente && modificato &&
         !confirm('Hai presenze non salvate. Cambiando data andranno perse. Continuare?')) {
@@ -593,278 +683,112 @@ function vaiAData(data) {
     return true;
 }
 
-/* ---------- INIZIALIZZAZIONE DATE ---------- */
+$('dataAllenamento').onchange = (e) => vaiAData(e.target.value);
+$('listaSalvataggi').onchange = aggiornaDettaglio;
 
-const oggi = oggiLocale();
-document.getElementById('dataAllenamento').value = oggi;
-document.getElementById('meseStats').value = oggi.slice(0, 7);
-
-document.getElementById('dataAllenamento').onchange = (e) => vaiAData(e.target.value);
-
-document.getElementById('giorniSalvati').onchange = (e) => {
-    if (e.target.value) vaiAData(e.target.value);
-    aggiornaGiorniSalvati();
-};
-
-/* ---------- STORICO E STATISTICHE ---------- */
-
-document.getElementById('btnCalcolaStats').onclick = () => {
-    const mese = document.getElementById('meseStats').value;
-    const reg = leggiRegistro();
-    const conteggio = new Map();
-    let sessioni = 0;
-    for (const [d, lista] of Object.entries(reg)) {
-        if (mese && d.startsWith(mese) && Array.isArray(lista)) {
-            sessioni++;
-            lista.forEach(n => conteggio.set(n, (conteggio.get(n) || 0) + 1));
-        }
-    }
-    const res = Array.from(conteggio.entries()).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
-    document.getElementById('statsResult').style.display = 'block';
-    document.getElementById('totAllenamentiMese').innerText = `SESSIONI TOTALI: ${sessioni}`;
-
-    const box = document.getElementById('listaRanking');
-    box.innerHTML = '';
-    res.forEach(i => {
-        const row = document.createElement('div');
-        row.className = 'ranking-item';
-        const nome = document.createElement('span');
-        nome.textContent = i[0];
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = i[1] + ' / ' + sessioni;
-        row.appendChild(nome);
-        row.appendChild(badge);
-        box.appendChild(row);
-    });
-};
-
-function preparaStampa() {
-    document.body.classList.remove('stampa-foglio');
-    document.getElementById('dataStampaHeader').innerText = "REGISTRO: " + document.getElementById('dataAllenamento').value;
-    window.print();
-}
-
-/* ---------- SALVA / RESET ---------- */
-
-document.getElementById('btnSalva').onclick = () => {
-    const data = document.getElementById('dataAllenamento').value;
+$('btnSalva').onclick = () => {
+    const data = $('dataAllenamento').value;
     if (!data) { alert('Scegli una data.'); return; }
-    const reg = leggiRegistro();
-
-    if (presenze.size === 0) {
-        if (reg[data]) {
-            if (confirm('Nessun presente: vuoi eliminare il salvataggio di questa data?')) {
-                delete reg[data];
-                if (scriviRegistro(reg)) { modificato = false; aggiornaGiorniSalvati(); alert('Salvataggio eliminato.'); }
-            }
-        } else {
-            alert('Nessun presente da salvare.');
-        }
-        return;
-    }
-
-    reg[data] = Array.from(presenze);
-    if (scriviRegistro(reg)) {
-        dataCorrente = data;
-        modificato = false;
-        aggiornaGiorniSalvati();
-        alert("Salvato correttamente!");
-    }
+    if (presenze.size === 0) { alert('Nessun presente da salvare.'); return; }
+    const attuali = Array.from(presenze).sort((a, b) => a.localeCompare(b, 'it'));
+    const ultimo = salvataggiDelGiorno(data)[0];
+    if (ultimo && ultimo.presenti.length === attuali.length &&
+        ultimo.presenti.slice().sort((a, b) => a.localeCompare(b, 'it')).every((n, i) => n === attuali[i]) &&
+        !confirm("Identico all'ultimo salvataggio di questa data. Salvare comunque?")) return;
+    const adesso = new Date();
+    const nuovo = { id: adesso.toISOString(), data: data, ts: adesso.toISOString(), coach: nomeCoach(), presenti: attuali };
+    const lista = leggiSalvataggi();
+    lista.push(nuovo);
+    if (!scriviSalvataggi(lista)) return;
+    dataCorrente = data;
+    modificato = false;
+    aggiornaSalvataggi(nuovo.id);
+    alert('Salvato correttamente!');
 };
 
-document.getElementById('btnReset').onclick = () => {
-    if(confirm("Svuotare la lista attuale?")) { presenze.clear(); modificato = true; aggiornaAnteprima(); }
+$('btnCancellaSalvataggio').onclick = () => {
+    const s = salvataggioSelezionato();
+    if (!s) { alert('Nessun salvataggio da cancellare.'); return; }
+    const quando = s.migrato ? 'precedente' : 'delle ' + oraDi(s);
+    if (!confirm('Cancellare il salvataggio ' + quando + ' del ' + dataIt(s.data) + ' (' + s.presenti.length + ' presenti)?')) return;
+    if (!scriviSalvataggi(leggiSalvataggi().filter(x => x.id !== s.id))) return;
+    if (!modificato) caricaGiorno(dataCorrente);
+    else aggiornaSalvataggi();
+    alert('Salvataggio cancellato.');
 };
 
-/* ---------- SYNC TRA COACH ---------- */
-
-// Controlla che il file ricevuto sia uno storico presenze valido
-// (stesso formato del vecchio backup: { "AAAA-MM-GG": ["Nome", ...] })
-function validaRegistro(obj) {
-    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
-        throw new Error('formato non riconosciuto');
-    }
-    const out = {};
-    for (const [d, lista] of Object.entries(obj)) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !Array.isArray(lista) || !lista.every(n => typeof n === 'string')) {
-            throw new Error('dati non validi alla data ' + d);
-        }
-        out[d] = Array.from(new Set(lista));
-    }
-    return out;
-}
-
-// Il file può essere nel formato nuovo { coach, presenze } oppure nel vecchio { data: [nomi] }
-function leggiFileSync(obj) {
-    if (obj && typeof obj === 'object' && !Array.isArray(obj) && obj.presenze && typeof obj.presenze === 'object') {
-        return {
-            coach: typeof obj.coach === 'string' ? obj.coach.trim().slice(0, 40) : '',
-            registro: validaRegistro(obj.presenze)
-        };
-    }
-    return { coach: '', registro: validaRegistro(obj) };
-}
-
-// CONDIVIDI COACH: manda le presenze salvate (menu condividi, altrimenti download)
-document.getElementById('btnExport').onclick = async () => {
-    const coach = nomeCoach();
-    if (!coach) { alert('Scrivi prima il tuo nome nel campo Coach.'); document.getElementById('nomeCoach').focus(); return; }
-    const reg = leggiRegistro();
-    if (Object.keys(reg).length === 0) { alert('Nessuna presenza salvata da condividere.'); return; }
-    const testo = JSON.stringify({ coach: coach, presenze: reg });
-    const nome = 'presenze_' + (coach.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'coach') + '_' + oggiLocale() + '.json';
+// INVIA SU STAFF WHATSAPP: condivide il file JSON del salvataggio scelto
+$('btnInvia').onclick = async () => {
+    const s = salvataggioSelezionato();
+    if (!s) { alert('Salva prima le presenze di oggi.'); return; }
+    const coach = s.coach || nomeCoach();
+    if (!coach) { alert('Scrivi prima il tuo nome nel campo Coach.'); $('nomeCoach').focus(); return; }
+    const ora = oraDi(s);
+    const payload = {
+        versione: 2, coach: coach, data: s.data, ora: ora,
+        totale: s.presenti.length,
+        presenti: s.presenti.slice().sort((a, b) => a.localeCompare(b, 'it'))
+    };
+    const testo = JSON.stringify(payload, null, 2);
+    const nomeSicuro = coach.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'coach';
+    const nomeFile = 'presenze_' + s.data + (ora ? '_' + ora.replace(':', '') : '') + '_' + nomeSicuro + '.json';
     try {
-        const file = new File([testo], nome, {type: 'application/json'});
+        const file = new File([testo], nomeFile, {type: 'application/json'});
         if (navigator.canShare && navigator.canShare({files: [file]})) {
-            await navigator.share({files: [file], title: 'Presenze coach'});
+            await navigator.share({files: [file], title: 'Presenze ' + dataIt(s.data) + ' - ' + coach});
             return;
         }
     } catch (e) {
-        if (e && e.name === 'AbortError') return; // l'utente ha chiuso il menu
+        if (e && e.name === 'AbortError') return; // l'utente ha chiuso il menù
     }
-    scaricaTesto(testo, nome);
-};
-
-// UNISCI DA COACH: fonde le presenze ricevute con quelle del telefono
-document.getElementById('btnFakeImport').onclick = () => document.getElementById('importFile').click();
-
-document.getElementById('importFile').onchange = (e) => {
-    const f = e.target.files[0];
-    e.target.value = ''; // permette di riselezionare lo stesso file
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = (ev) => {
-        let ricevuto, daCoach = '';
-        try {
-            const f = leggiFileSync(JSON.parse(ev.target.result));
-            ricevuto = f.registro;
-            daCoach = f.coach;
-        } catch (err) {
-            alert('File non valido: ' + err.message);
-            return;
-        }
-        const reg = leggiRegistro();
-        const unito = Object.assign({}, reg);
-        let nuove = 0, aggiornate = 0;
-        for (const [d, lista] of Object.entries(ricevuto)) {
-            if (!reg[d]) {
-                unito[d] = lista;
-                nuove++;
-            } else {
-                const set = new Set([].concat(reg[d], lista));
-                if (set.size > new Set(reg[d]).size) {
-                    unito[d] = Array.from(set).sort((a, b) => a.localeCompare(b));
-                    aggiornate++;
-                }
-            }
-        }
-        if (nuove === 0 && aggiornate === 0) {
-            alert('Niente di nuovo: hai già tutte queste presenze.');
-            return;
-        }
-        if (!confirm('Unire le presenze' + (daCoach ? ' di ' + daCoach : '') + '?\n\nDate nuove: ' + nuove + '\nDate aggiornate: ' + aggiornate + '\n\nPrima ne viene salvato un backup.')) return;
-        if (!creaBackup('unione')) return;
-        if (!scriviRegistro(unito)) return;
-        aggiornaGiorniSalvati();
-
-        // aggiorna anche lo schermo se la data aperta è stata toccata
-        if (unito[dataCorrente]) unito[dataCorrente].forEach(n => presenze.add(n));
-        aggiornaAnteprima();
-        alert('✅ Presenze unite!');
-    };
-    r.readAsText(f);
-};
-
-/* ---------- LISTA ATLETI: PULSANTI ---------- */
-
-document.getElementById('filtroCat').onchange = render;
-
-document.getElementById('btnModificaCat').onclick = function() {
-    if (atleti.length === 0) { alert('Carica prima la lista atleti.'); return; }
-    modCat = !modCat;
-    this.textContent = modCat ? '✅ Fine modifica categorie' : '✏️ Modifica categorie';
-    if (!modCat) costruisciFiltro();
-    render();
-};
-
-document.getElementById('btnCaricaAtleti').onclick = function() {
-    document.getElementById('caricaAtletiFile').click();
-};
-
-document.getElementById('caricaAtletiFile').onchange = function(e) {
-    const f = e.target.files[0];
-    e.target.value = '';
-    if (f) caricaDaFileJSON(f);
-};
-
-document.getElementById('btnScaricaAtleti').onclick = () => {
-    if (atleti.length === 0) { alert('Nessuna lista da scaricare.'); return; }
-    scaricaJSON(atleti, 'atleti.json');
-};
-
-document.getElementById('btnRimuoviAtleti').onclick = () => {
-    if (atleti.length === 0) { alert('Nessuna lista da rimuovere.'); return; }
-    if (!confirm('Rimuovere la lista atleti? Dovrai ricaricare il file JSON.')) return;
-    localStorage.removeItem(ATLETA_KEY);
-    atleti = [];
-    presenze.clear();
-    modificato = false;
-    aggiornaStatoAtleti();
-};
-
-/* ---------- RIPRISTINO BACKUP ---------- */
-
-document.getElementById('btnRipristina').onclick = () => {
-    const i = document.getElementById('listaBackup').value;
-    const lista = leggiBackup();
-    if (i === '' || !lista[i]) { alert('Scegli un backup dal menù.'); return; }
-    let registro;
-    try { registro = validaRegistro(lista[i].registro); }
-    catch (e) { alert('Backup non valido.'); return; }
-    const quando = formattaOra(lista[i].ts);
-    if (!confirm('Ripristinare lo storico com\'era il ' + quando + '?\n\nLe presenze attuali vengono sostituite (prima ne viene salvata una copia).' + (modificato ? '\nLe presenze non salvate sullo schermo andranno perse.' : ''))) return;
-    if (!creaBackup('ripristino')) return;
-    if (!scriviRegistro(registro)) return;
-    caricaGiorno(dataCorrente);
-    alert('✅ Storico ripristinato.');
-};
-
-document.getElementById('btnRipristinaFile').onclick = () => document.getElementById('ripristinaFile').click();
-
-// Ripristina lo storico da un file scelto a mano (qualsiasi file di presenze, non solo i backup automatici)
-document.getElementById('ripristinaFile').onchange = (e) => {
-    const f = e.target.files[0];
-    e.target.value = '';
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = (ev) => {
-        let registro, daCoach = '';
-        try {
-            const x = leggiFileSync(JSON.parse(ev.target.result));
-            registro = x.registro;
-            daCoach = x.coach;
-        } catch (err) {
-            alert('File non valido: ' + err.message);
-            return;
-        }
-        const n = Object.keys(registro).length;
-        if (n === 0) { alert('Il file non contiene presenze.'); return; }
-        if (!confirm('Ripristinare da file' + (daCoach ? ' di ' + daCoach : '') + '?\n\nIl file contiene ' + n + ' giorni. Tutto lo storico attuale viene SOSTITUITO.\n\nPrima ne viene salvata una copia di sicurezza.' + (modificato ? '\nLe presenze non salvate sullo schermo andranno perse.' : ''))) return;
-        if (!creaBackup('ripristino')) return;
-        if (!scriviRegistro(registro)) return;
-        caricaGiorno(dataCorrente);
-        alert('✅ Storico ripristinato dal file.');
-    };
-    r.readAsText(f);
+    scaricaTesto(testo, nomeFile);
+    alert('La condivisione diretta non è disponibile su questo dispositivo: il file è stato scaricato. Allegalo tu al messaggio su WhatsApp.');
 };
 
 /* ---------- COACH ---------- */
 
-document.getElementById('nomeCoach').oninput = () => {
+$('nomeCoach').oninput = () => {
     try { localStorage.setItem(COACH_KEY, nomeCoach()); } catch (e) {}
-    aggiornaAnteprima();
 };
+
+/* ---------- LISTA E FILTRO ---------- */
+
+function render() {
+    const tbody = $('atletiBody');
+    tbody.innerHTML = '';
+    const f = $('filtroCat').value;
+    atleti.forEach(atleta => {
+        if (f !== 'tutti' && norm(categoriaDi(atleta)) !== f) return;
+        const tr = document.createElement('tr');
+        tr.className = 'atleta-row' + (presenze.has(atleta.n) ? ' presente' : '');
+
+        const tdNome = document.createElement('td');
+        tdNome.textContent = atleta.n;
+        const tdAnno = document.createElement('td');
+        tdAnno.textContent = atleta.a;
+        const tdOk = document.createElement('td');
+        tdOk.style.textAlign = 'center';
+        const mark = document.createElement('span');
+        mark.className = 'check-mark';
+        mark.textContent = presenze.has(atleta.n) ? '●' : '○';
+        tdOk.appendChild(mark);
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdAnno);
+        tr.appendChild(tdOk);
+        tr.onclick = (e) => {
+            e.preventDefault();
+            if (presenze.has(atleta.n)) presenze.delete(atleta.n);
+            else presenze.add(atleta.n);
+            modificato = true;
+            render();
+        };
+        tbody.appendChild(tr);
+    });
+    $('contaPresenti').textContent = presenze.size ? 'Presenti: ' + presenze.size : '';
+}
+
+$('filtroCat').onchange = render;
 
 /* ---------- FOGLIO PRESENZE STAMPABILE ---------- */
 
@@ -956,7 +880,7 @@ function tabellaFoglio(lista, anno, m, nGiorni) {
 
 // Foglio da compilare a mano: tutto il mese, tutti gli atleti, una pagina per gruppo
 function creaFoglio() {
-    const mese = document.getElementById('meseFoglio').value;
+    const mese = $('meseFoglio').value;
     if (!mese) { alert('Scegli un mese.'); return; }
     if (atleti.length === 0) { alert('Carica prima la lista atleti.'); return; }
     const p = mese.split('-').map(Number);
@@ -964,43 +888,52 @@ function creaFoglio() {
     const nGiorni = new Date(anno, m, 0).getDate();
     const nomeMese = new Date(anno, m - 1, 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase();
 
-    const box = document.getElementById('foglioStampa');
+    const box = $('foglioStampa');
     box.innerHTML = '';
     gruppiFoglio().forEach(g => {
         const pagina = document.createElement('div');
         pagina.className = 'foglio-pagina';
 
+        const testa = document.createElement('div');
+        testa.className = 'foglio-testa';
+        const logo = document.createElement('img');
+        logo.src = LOGO_SRC;
+        logo.alt = '';
+        testa.appendChild(logo);
+
         const titolo = document.createElement('div');
         titolo.className = 'foglio-titolo';
         titolo.textContent = nomeMese;
-        pagina.appendChild(titolo);
+        testa.appendChild(titolo);
 
         const gruppo = document.createElement('div');
         gruppo.className = 'foglio-gruppo';
         gruppo.textContent = g.titolo;
-        pagina.appendChild(gruppo);
+        testa.appendChild(gruppo);
 
         const sotto = document.createElement('div');
         sotto.className = 'foglio-sotto';
         sotto.textContent = "ASD VALL'IPPARI VITTORIA BASKET";
-        pagina.appendChild(sotto);
+        testa.appendChild(sotto);
 
+        pagina.appendChild(testa);
         pagina.appendChild(tabellaFoglio(g.atleti, anno, m, nGiorni));
         box.appendChild(pagina);
     });
 
+    // La classe agisce solo in stampa: la lascio attiva perché su alcuni dispositivi la stampa parte in ritardo
     document.body.classList.add('stampa-foglio');
     window.print();
 }
 
-document.getElementById('btnFoglio').onclick = creaFoglio;
-// La classe 'stampa-foglio' agisce solo in stampa: la lascio attiva (su iPhone la stampa parte in ritardo
-// e se la togliessi subito uscirebbe la pagina normale). Il pulsante STAMPA la rimuove.
+$('btnFoglio').onclick = creaFoglio;
 
 /* ---------- AVVIO ---------- */
-try { document.getElementById('nomeCoach').value = localStorage.getItem(COACH_KEY) || ''; } catch (e) {}
-document.getElementById('meseFoglio').value = oggi.slice(0, 7);
-aggiornaListaBackup();
+$('logoTesta').src = LOGO_SRC;
+try { $('nomeCoach').value = localStorage.getItem(COACH_KEY) || ''; } catch (e) {}
+const oggi = oggiLocale();
+$('dataAllenamento').value = oggi;
+$('meseFoglio').value = oggi.slice(0, 7);
 caricaAtletiSalvati();
 caricaGiorno(oggi);
 </script>
