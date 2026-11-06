@@ -185,7 +185,7 @@ details.guida[open] summary { margin-bottom: 10px; }
     <div class="pannello" id="pnlAggiungi">
         <label>NOME E COGNOME</label>
         <input type="text" id="addNome" maxlength="60" placeholder="Cognome Nome">
-        <label>ANNO DI NASCITA</label>
+        <label>ANNO DI NASCITA (vuoto se non noto)</label>
         <input type="number" id="addAnno" inputmode="numeric" placeholder="es. 2016">
         <label>CATEGORIA</label>
         <select id="addCat"></select>
@@ -198,7 +198,7 @@ details.guida[open] summary { margin-bottom: 10px; }
         <select id="modSel"></select>
         <label>NOME E COGNOME</label>
         <input type="text" id="modNome" maxlength="60">
-        <label>ANNO DI NASCITA</label>
+        <label>ANNO DI NASCITA (vuoto se non noto)</label>
         <input type="number" id="modAnno" inputmode="numeric">
         <label>CATEGORIA</label>
         <select id="modCat"></select>
@@ -375,12 +375,16 @@ function validaAtleti(data) {
         throw new Error('Formato JSON non valido. Deve essere un array di atleti.');
     }
     return data.map((x, i) => {
-        const a = Number(x && x.a);
-        if (!x || typeof x.n !== 'string' || !x.n.trim() || !Number.isInteger(a)) {
-            throw new Error('Atleta #' + (i + 1) + ' non valido. Ogni atleta deve avere "n" (nome) e "a" (anno).');
+        const grezzo = x ? String(x.a === undefined || x.a === null ? '' : x.a).trim() : '';
+        const ignoto = grezzo === '' || grezzo === '-';   // anno non noto: ammesso
+        const a = ignoto ? null : Number(grezzo);
+        if (!x || typeof x.n !== 'string' || !x.n.trim() || (!ignoto && !Number.isInteger(a))) {
+            throw new Error('Atleta #' + (i + 1) + ' non valido. Ogni atleta deve avere "n" (nome) e "a" (anno, oppure "-" se non noto).');
         }
         const atleta = { n: x.n.trim(), a: a };
-        const c = (typeof x.c === 'string') ? x.c.trim().slice(0, 30) : '';
+        let c = (typeof x.c === 'string') ? x.c.trim().slice(0, 30) : '';
+        // senza anno la categoria non si può calcolare: uso il gruppo del file (es. "Verifica")
+        if (!c && a === null && typeof x.gruppo === 'string') c = x.gruppo.trim().slice(0, 30);
         if (c) atleta.c = c;
         return atleta;
     });
@@ -426,7 +430,15 @@ function caricaDaFileJSON(file) {
     const r = new FileReader();
     r.onload = function(ev) {
         try {
-            atleti = validaAtleti(JSON.parse(ev.target.result)).sort((a, b) => a.n.localeCompare(b.n, 'it'));
+            const nuova = validaAtleti(JSON.parse(ev.target.result)).sort((a, b) => a.n.localeCompare(b.n, 'it'));
+            // le presenze sono legate al nome: due atleti con lo stesso nome si segnerebbero insieme
+            const visti = new Set(), doppi = new Set();
+            nuova.forEach(a => { const k = norm(a.n); if (visti.has(k)) doppi.add(a.n); visti.add(k); });
+            if (doppi.size) {
+                throw new Error('Nomi duplicati nella lista: ' + Array.from(doppi).slice(0, 8).join(', ') +
+                    (doppi.size > 8 ? '…' : '') + '. Usa "COGNOME NOME" in "n" per distinguerli.');
+            }
+            atleti = nuova;
             salvaAtleti();
             aggiornaStatoAtleti();
             alert('✅ Caricati ' + atleti.length + ' atleti!');
@@ -480,7 +492,7 @@ function aggiornaSelAtleti() {
         atleti.forEach(a => {
             const o = document.createElement('option');
             o.value = a.n;
-            o.textContent = a.n + ' (' + a.a + ')';
+            o.textContent = a.a ? a.n + ' (' + a.a + ')' : a.n;
             sel.appendChild(o);
         });
         if (atleti.some(a => a.n === prec)) sel.value = prec;
@@ -491,16 +503,21 @@ function aggiornaSelAtleti() {
 function popolaModifica() {
     const a = atleti.find(x => x.n === $('modSel').value);
     $('modNome').value = a ? a.n : '';
-    $('modAnno').value = a ? a.a : '';
+    $('modAnno').value = a && a.a ? a.a : '';
     opzioniCategoria($('modCat'), a && a.c);
 }
 
-function leggiDatiAtleta(idNome, idAnno) {
+function leggiDatiAtleta(idNome, idAnno, idCat) {
     const nome = $(idNome).value.trim().replace(/\s+/g, ' ').slice(0, 60);
-    const anno = Number($(idAnno).value);
+    const grezzo = $(idAnno).value.trim();
+    const anno = grezzo === '' ? null : Number(grezzo);   // vuoto = anno non noto
     if (!nome) { alert('Scrivi il nome e cognome.'); return null; }
-    if (!Number.isInteger(anno) || anno < 1990 || anno > new Date().getFullYear()) {
+    if (anno !== null && (!Number.isInteger(anno) || anno < 1990 || anno > new Date().getFullYear())) {
         alert('Anno di nascita non valido.');
+        return null;
+    }
+    if (anno === null && !$(idCat).value) {
+        alert('Senza anno di nascita devi scegliere una categoria.');
         return null;
     }
     return { nome: nome, anno: anno };
@@ -521,7 +538,7 @@ $('btnRimuovi').onclick = () => {
 $('modSel').onchange = popolaModifica;
 
 $('btnConfermaAggiungi').onclick = () => {
-    const d = leggiDatiAtleta('addNome', 'addAnno');
+    const d = leggiDatiAtleta('addNome', 'addAnno', 'addCat');
     if (!d) return;
     if (atleti.some(a => norm(a.n) === norm(d.nome))) {
         alert('Esiste già un atleta con questo nome. Se sono due omonimi, aggiungi una differenza (es. un\'iniziale).');
@@ -541,7 +558,7 @@ $('btnConfermaAggiungi').onclick = () => {
 $('btnConfermaModifica').onclick = () => {
     const a = atleti.find(x => x.n === $('modSel').value);
     if (!a) { alert('Scegli un atleta.'); return; }
-    const d = leggiDatiAtleta('modNome', 'modAnno');
+    const d = leggiDatiAtleta('modNome', 'modAnno', 'modCat');
     if (!d) return;
     if (atleti.some(x => x !== a && norm(x.n) === norm(d.nome))) {
         alert('Esiste già un altro atleta con questo nome.');
@@ -765,7 +782,7 @@ function render() {
         const tdNome = document.createElement('td');
         tdNome.textContent = atleta.n;
         const tdAnno = document.createElement('td');
-        tdAnno.textContent = atleta.a;
+        tdAnno.textContent = atleta.a || '-';
         const tdOk = document.createElement('td');
         tdOk.style.textAlign = 'center';
         const mark = document.createElement('span');
