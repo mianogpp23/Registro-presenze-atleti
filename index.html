@@ -147,7 +147,7 @@ details.guida[open] summary { margin-bottom: 10px; }
         <p><b>Rimuovi atleta</b>: toglie l'atleta dalla lista. Le presenze già salvate restano.</p>
 
         <h3>✅ Presenze</h3>
-        <p><b>Gruppo</b>: mostra solo una categoria. Le categorie si calcolano dall'anno di nascita e slittano da sole a settembre.</p>
+        <p><b>Gruppo</b>: mostra solo una categoria. Le categorie si calcolano dall'anno di nascita: Aquilotti 2014-2015, Scoiattoli 2016-2017, Pulcini 2018-2021.</p>
         <p><b>Tocca un nome</b>: segna o toglie la presenza dell'atleta.</p>
         <p><b>Salva presenze di oggi</b>: aggiunge un nuovo salvataggio per la data scelta. Non sostituisce quelli precedenti.</p>
         <p><b>Salvataggi di oggi</b>: elenco dei salvataggi della data scelta, dal più recente. Scegli quello su cui lavorare.</p>
@@ -155,7 +155,7 @@ details.guida[open] summary { margin-bottom: 10px; }
         <p><b>Cancella salvataggio</b>: elimina solo il salvataggio scelto, dopo una conferma.</p>
 
         <h3>🖨 Foglio presenze stampabile</h3>
-        <p><b>Crea foglio</b>: scegli il mese e tocca il pulsante. Si apre la stampa di tutto il mese con tutti gli atleti: una pagina per ogni gruppo, in una tabella tipo foglio Excel con una colonna per giorno dove mettere la X e una colonna TOT. Serve per compilarlo a mano. Dalla schermata di stampa puoi salvare il PDF.</p>
+        <p><b>Crea foglio</b>: scegli il mese e tocca il pulsante. Si apre la stampa di tutto il mese con tutti gli atleti: una pagina per ogni gruppo, in una tabella tipo foglio Excel con nome, anno di nascita e una colonna per giorno dove mettere la X e una colonna TOT. Serve per compilarlo a mano. Dalla schermata di stampa puoi salvare il PDF.</p>
     </div>
 </details>
 
@@ -220,9 +220,10 @@ details.guida[open] summary { margin-bottom: 10px; }
     <table>
         <thead>
             <tr>
-                <th style="width:60%">Atleta</th>
-                <th style="width:20%">Anno</th>
-                <th style="width:20%; text-align:center">Ok</th>
+                <th style="width:40%">Atleta</th>
+                <th style="width:15%">Anno</th>
+                <th style="width:30%">Categoria</th>
+                <th style="width:15%; text-align:center">Ok</th>
             </tr>
         </thead>
         <tbody id="atletiBody"></tbody>
@@ -302,19 +303,17 @@ function scaricaTesto(testo, filename) {
 
 /* ---------- CATEGORIE ---------- */
 
-// La stagione cambia a settembre: da settembre 2026 ad agosto 2027 è la stagione 2026
-const STAGIONE = (function() {
-    const d = new Date();
-    return d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
-})();
-
-// Fasce di due anni di nascita, calcolate sulla stagione (slittano da sole ogni anno)
+// Categorie fisse per anno di nascita
 const CATEGORIE = [
-    { nome: 'Pulcini',    anni: [STAGIONE - 6,  STAGIONE - 5]  },
-    { nome: 'Scoiattoli', anni: [STAGIONE - 8,  STAGIONE - 7]  },
-    { nome: 'Aquilotti',  anni: [STAGIONE - 10, STAGIONE - 9]  },
-    { nome: 'Under 13',   anni: [STAGIONE - 12, STAGIONE - 11] }
+    { nome: 'Aquilotti',  anni: [2014, 2015] },
+    { nome: 'Scoiattoli', anni: [2016, 2017] },
+    { nome: 'Pulcini',    anni: [2018, 2019, 2020, 2021] }
 ];
+
+// Etichetta degli anni: "2014-15", "2018-21"
+function etichettaAnni(c) {
+    return c.anni[0] + '-' + String(c.anni[c.anni.length - 1]).slice(2);
+}
 
 // Categoria manuale se presente, altrimenti quella calcolata dall'anno di nascita
 function categoriaDi(atleta) {
@@ -337,7 +336,7 @@ function costruisciFiltro() {
     const viste = new Set();
     CATEGORIE.forEach(c => {
         viste.add(norm(c.nome));
-        aggiungi(norm(c.nome), c.nome.toUpperCase() + ' (' + c.anni[0] + '-' + String(c.anni[1]).slice(2) + ')');
+        aggiungi(norm(c.nome), c.nome.toUpperCase() + ' (' + etichettaAnni(c) + ')');
     });
     atleti.forEach(a => {
         if (a.c && !viste.has(norm(a.c))) {
@@ -783,6 +782,8 @@ function render() {
         tdNome.textContent = atleta.n;
         const tdAnno = document.createElement('td');
         tdAnno.textContent = atleta.a || '-';
+        const tdCat = document.createElement('td');
+        tdCat.textContent = categoriaDi(atleta) || '-';
         const tdOk = document.createElement('td');
         tdOk.style.textAlign = 'center';
         const mark = document.createElement('span');
@@ -792,6 +793,7 @@ function render() {
 
         tr.appendChild(tdNome);
         tr.appendChild(tdAnno);
+        tr.appendChild(tdCat);
         tr.appendChild(tdOk);
         tr.onclick = (e) => {
             e.preventDefault();
@@ -815,7 +817,7 @@ function gruppiFoglio() {
     const usati = new Set();
     CATEGORIE.forEach(c => {
         usati.add(norm(c.nome));
-        gruppi.push({ chiave: norm(c.nome), titolo: c.nome.toUpperCase() + ' (' + c.anni[0] + '-' + String(c.anni[1]).slice(2) + ')' });
+        gruppi.push({ chiave: norm(c.nome), titolo: c.nome.toUpperCase() + ' (' + etichettaAnni(c) + ')' });
     });
     atleti.forEach(a => {
         const cat = categoriaDi(a);
@@ -833,8 +835,8 @@ function gruppiFoglio() {
 function tabellaFoglio(lista, anno, m, nGiorni) {
     const tab = document.createElement('table');
     const cg = document.createElement('colgroup');
-    const larghezze = [4, 26];
-    for (let g = 1; g <= nGiorni; g++) larghezze.push(65 / nGiorni);
+    const larghezze = [4, 23, 5];
+    for (let g = 1; g <= nGiorni; g++) larghezze.push(63 / nGiorni);
     larghezze.push(5);
     larghezze.forEach(l => {
         const c = document.createElement('col');
@@ -846,7 +848,7 @@ function tabellaFoglio(lista, anno, m, nGiorni) {
     const lettere = ['D', 'L', 'M', 'M', 'G', 'V', 'S'];
     const eDomenica = g => new Date(anno, m - 1, g).getDay() === 0;
 
-    // intestazione: N. | ATLETA | giorni | TOT
+    // intestazione: N. | ATLETA | ANNO | giorni | TOT
     const thead = document.createElement('thead');
     const trH = document.createElement('tr');
     const intest = (testo, classe) => {
@@ -857,6 +859,7 @@ function tabellaFoglio(lista, anno, m, nGiorni) {
     };
     trH.appendChild(intest('N.'));
     trH.appendChild(intest('ATLETA'));
+    trH.appendChild(intest('ANNO'));
     for (let g = 1; g <= nGiorni; g++) {
         const th = document.createElement('th');
         if (eDomenica(g)) th.className = 'dom';
@@ -881,6 +884,9 @@ function tabellaFoglio(lista, anno, m, nGiorni) {
         tdN.className = 'nome';
         tdN.textContent = a.n;
         tr.appendChild(tdN);
+        const tdA = document.createElement('td');
+        tdA.textContent = a.a || '';
+        tr.appendChild(tdA);
         for (let g = 1; g <= nGiorni; g++) {
             const td = document.createElement('td');
             if (eDomenica(g)) td.className = 'dom';
